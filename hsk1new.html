@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HSK 1 Vocabulary Slideshow</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- GSAP Animation Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <!-- Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Custom CSS -->
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      /* Hide all slides initially */
+      .slide {
+        visibility: hidden;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+      }
+      .hanzi {
+        font-family: "Noto Sans SC", sans-serif;
+        font-size: 1.3rem;
+        font-weight: 500;
+      }
+      .pinyin {
+        font-size: 1rem;
+      }
+      .translation {
+        font-style: italic;
+        font-size: 1rem;
+      }
+      /* Class for elements to be animated */
+      .anim-el {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      #particles-js {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        z-index: -1;
+      }
+      /* Custom Scrollbar for Webkit Browsers */
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 0, 0, 0.3);
+      }
+      
+      /* Canvas Overlay */
+      #drawing-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 20;
+        pointer-events: none; /* Initially ignore pointer events */
+      }
+      
+      .drawing-active #drawing-canvas {
+        pointer-events: auto; /* Enable drawing when in pen/eraser mode */
+      }
+
+      .drawing-controls button.active {
+        background-color: #f97316 !important;
+        color: #ffffff;
+      }
+    </style>
+  </head>
+  <body
+    class="h-screen w-screen overflow-hidden flex flex-col items-center justify-center bg-slate-100"
+  >
+    <div id="particles-js"></div>
+
+    <div class="w-full h-full flex items-center justify-center p-4 md:p-6 z-10">
+      <!-- Slideshow Container -->
+      <div
+        id="slideshow-container"
+        class="relative w-full h-full max-w-screen-2xl rounded-3xl cursor-pointer"
+      >
+        <!-- Slide 1: Judul -->
+        <div
+          class="slide p-8 md:p-12 flex flex-col justify-center items-center text-center bg-white/60 backdrop-blur-xl rounded-3xl border border-white/30 shadow-2xl"
+        >
+          <h1
+            class="anim-el text-5xl md:text-7xl font-bold text-indigo-600 mb-4"
+          >
+            Selamat Datang!
+          </h1>
+          <h2 class="anim-el text-4xl md:text-6xl font-bold text-slate-800">
+            欢迎来到HSK 1词汇课!
+          </h2>
+          <h3 class="anim-el text-2xl md:text-3xl text-slate-500 mt-2">
+            (Huānyíng lái dào HSK 1 cíhuì kè!)
+          </h3>
+        </div>
+
+        <!-- Slide 2: Agenda -->
+        <div
+          class="slide p-8 md:p-12 flex flex-col justify-center items-center text-center bg-white/60 backdrop-blur-xl rounded-3xl border border-white/30 shadow-2xl"
+        >
+          <h3
+            class="anim-el text-4xl md:text-5xl font-bold mb-2 text-slate-800"
+          >
+            Mempelajari HSK 1
+          </h3>
+          <h4 class="anim-el text-2xl md:text-3xl text-slate-500 mb-8">
+            (学习 HSK 1 - Xuéxí HSK 1)
+          </h4>
+          <ol
+            class="anim-el text-xl md:text-3xl text-left space-y-4 text-slate-700"
+          >
+            <li class="flex items-center">
+              <span class="text-blue-500 mr-3 font-bold">1.</span> Kosakata
+              (生词 - shēngcí)
+            </li>
+            <li class="flex items-center">
+              <span class="text-green-500 mr-3 font-bold">2.</span> Latihan
+              (练习 - liànxí)
+            </li>
+            <li class="flex items-center">
+              <span class="text-purple-500 mr-3 font-bold">3.</span> Ringkasan
+              (总结 - zǒngjié)
+            </li>
+          </ol>
+        </div>
+
+        <!-- SECTION START: VOCABULARY -->
+        <div
+          class="slide p-8 md:p-12 flex flex-col justify-center items-center bg-white/60 backdrop-blur-xl rounded-3xl border border-white/30 shadow-2xl"
+        >
+          <img
+            src="https://placehold.co/100x100/3b82f6/FFFFFF?text=词"
+            alt="Vocab Icon"
+            class="anim-el w-20 h-20 mb-6 rounded-full shadow-lg"
+          />
+          <h2 class="anim-el text-4xl md:text-5xl font-bold text-blue-600">
+            Bagian 1: Kosakata
+          </h2>
+          <p class="anim-el text-3xl text-slate-500 mt-2">生词 (Shēngcí)</p>
+        </div>
+      </div>
+      
+      <!-- Drawing Controls -->
+      <div class="drawing-controls absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-4 p-2 bg-white/80 backdrop-blur-md rounded-full shadow-lg z-50">
+        <button id="neutral-button" title="Kembali ke Navigasi" class="control-btn p-3 rounded-full text-gray-500 hover:bg-gray-200 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-mouse-2" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 3m0 4a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v8a4 4 0 0 1 -4 4h-4a4 4 0 0 1 -4 -4z" /><path d="M12 7l0 4" /></svg>
+        </button>
+        <button id="pen-button" title="Pena" class="control-btn p-3 rounded-full text-blue-500 hover:bg-blue-100 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-pencil" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" /><path d="M13.5 6.5l4 4" /></svg>
+        </button>
+        <button id="eraser-button" title="Penghapus" class="control-btn p-3 rounded-full text-yellow-500 hover:bg-yellow-100 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-eraser" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M19 20h-10.5l-4.21 -4.3a1 1 0 0 1 0 -1.41l9.2 -9.3a4 4 0 0 1 5.66 5.66l-9.2 9.3" /><path d="M18 13.3l-6.3 -6.3" /></svg>
+        </button>
+        <button id="clear-button" title="Bersihkan" class="control-btn p-3 rounded-full text-red-500 hover:bg-red-100 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-trash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 7l16 0" /><path d="M10 11l0 6" /><path d="M14 11l0 6" /><path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" /><path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Particles.js CDN -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+      const vocabularyData = [
+          { "hanzi": "爱", "pinyin": "ài", "indonesian": "cinta", "example": "我爱你。", "translation": "Saya cinta kamu." },
+          { "hanzi": "八", "pinyin": "bā", "indonesian": "delapan", "example": "他八岁.", "translation": "Dia berusia delapan tahun." },
+          { "hanzi": "爸爸", "pinyin": "bàba", "indonesian": "ayah", "example": "我爸爸是医生.", "translation": "Ayah saya adalah seorang dokter." },
+          { "hanzi": "杯子", "pinyin": "bēizi", "indonesian": "cangkir", "example": "这个杯子是我的.", "translation": "Cangkir ini milik saya." },
+          { "hanzi": "北京", "pinyin": "Běijīng", "indonesian": "Beijing", "example": "我住在北京.", "translation": "Saya tinggal di Beijing." },
+          { "hanzi": "本", "pinyin": "běn", "indonesian": "buku", "example": "那本书很好看.", "translation": "Buku itu sangat menarik." },
+          { "hanzi": "不客气", "pinyin": "bú kèqi", "indonesian": "sama-sama", "example": "谢谢你. 不客气.", "translation": "Terima kasih. Sama-sama." },
+          { "hanzi": "不用谢", "pinyin": "bú yòng xiè", "indonesian": "tidak perlu berterima kasih", "example": "谢谢你. 不用谢.", "translation": "Terima kasih. Tidak perlu berterima kasih." },
+          { "hanzi": "菜", "pinyin": "cài", "indonesian": "sayuran; masakan", "example": "这道菜很好吃.", "translation": "Masakan ini sangat enak." },
+          { "hanzi": "茶", "pinyin": "chá", "indonesian": "teh", "example": "请喝茶.", "translation": "Silakan minum teh." },
+          { "hanzi": "吃", "pinyin": "chī", "indonesian": "makan", "example": "我想吃饭.", "translation": "Saya ingin makan nasi." },
+          { "hanzi": "出租车", "pinyin": "chūzūchē", "indonesian": "taksi", "example": "我们坐出租车去吧.", "translation": "Mari kita naik taksi." },
+          { "hanzi": "大", "pinyin": "dà", "indonesian": "besar", "example": "这个房间很大.", "translation": "Kamar ini sangat besar." },
+          { "hanzi": "打电话", "pinyin": "dǎ diànhuà", "indonesian": "menelepon", "example": "他正在打电话.", "translation": "Dia sedang menelepon." },
+          { "hanzi": "对不起", "pinyin": "duìbuqǐ", "indonesian": "maaf", "example": "对不起，我迟到了.", "translation": "Maaf, saya terlambat." },
+          { "hanzi": "对", "pinyin": "duì", "indonesian": "benar; betul", "example": "你说得对.", "translation": "Apa yang kamu katakan benar." },
+          { "hanzi": "多", "pinyin": "duō", "indonesian": "banyak", "example": "这儿有很多人.", "translation": "Di sini ada banyak orang." },
+          { "hanzi": "多少", "pinyin": "duōshao", "indonesian": "berapa", "example": "这个多少钱？", "translation": "Berapa harga ini?" },
+          { "hanzi": "儿子", "pinyin": "érzi", "indonesian": "anak laki-laki", "example": "我的儿子很帅.", "translation": "Anak laki-laki saya sangat tampan." },
+          { "hanzi": "二", "pinyin": "èr", "indonesian": "dua", "example": "我家有两个人.", "translation": "Di keluarga saya ada dua orang." },
+          { "hanzi": "饭店", "pinyin": "fàndiàn", "indonesian": "restoran", "example": "我们在饭店吃饭.", "translation": "Kami makan di restoran." },
+          { "hanzi": "飞机", "pinyin": "fēijī", "indonesian": "pesawat", "example": "我坐飞机去北京.", "translation": "Saya naik pesawat ke Beijing." },
+          { "hanzi": "分钟", "pinyin": "fēnzhōng", "indonesian": "menit", "example": "我等了你十分钟.", "translation": "Saya menunggumu sepuluh menit." },
+          { "hanzi": "高兴", "pinyin": "gāoxìng", "indonesian": "senang", "example": "我很高兴.", "translation": "Saya sangat senang." },
+          { "hanzi": "个", "pinyin": "gè", "indonesian": "buah (kata penggolong)", "example": "我有一个苹果.", "translation": "Saya punya satu buah apel." },
+          { "hanzi": "工作", "pinyin": "gōngzuò", "indonesian": "bekerja", "example": "我有很多工作.", "translation": "Saya punya banyak pekerjaan." },
+          { "hanzi": "狗", "pinyin": "gǒu", "indonesian": "anjing", "example": "这只狗很可爱.", "translation": "Anjing ini sangat lucu." },
+          { "hanzi": "汉语", "pinyin": "Hànyǔ", "indonesian": "bahasa Mandarin", "example": "我学习汉语.", "translation": "Saya belajar bahasa Mandarin." },
+          { "hanzi": "好", "pinyin": "hǎo", "indonesian": "baik", "example": "你好！", "translation": "Halo!" },
+          { "hanzi": "喝", "pinyin": "hē", "indonesian": "minum", "example": "你想喝什么？", "translation": "Kamu mau minum apa?" },
+          { "hanzi": "和", "pinyin": "hé", "indonesian": "dan", "example": "我和你一起去.", "translation": "Saya dan kamu pergi bersama." },
+          { "hanzi": "很", "pinyin": "hěn", "indonesian": "sangat", "example": "今天很冷.", "translation": "Hari ini sangat dingin." },
+          { "hanzi": "后面", "pinyin": "hòumiàn", "indonesian": "di belakang", "example": "商店在学校后面.", "translation": "Toko itu di belakang sekolah." },
+          { "hanzi": "回", "pinyin": "huí", "indonesian": "kembali", "example": "我回家了.", "translation": "Saya sudah pulang ke rumah." },
+          { "hanzi": "会", "pinyin": "huì", "indonesian": "bisa; akan", "example": "我不会说汉语.", "translation": "Saya tidak bisa berbahasa Mandarin." },
+          { "hanzi": "火车站", "pinyin": "huǒchēzhàn", "indonesian": "stasiun kereta", "example": "我们去火车站吧.", "translation": "Mari kita ke stasiun kereta." },
+          { "hanzi": "几", "pinyin": "jǐ", "indonesian": "beberapa; berapa", "example": "你家有几个人？", "translation": "Ada berapa orang di keluargamu?" },
+          { "hanzi": "家", "pinyin": "jiā", "indonesian": "rumah; keluarga", "example": "我回家了.", "translation": "Saya pulang ke rumah." },
+          { "hanzi": "叫", "pinyin": "jiào", "indonesian": "memanggil; nama", "example": "你叫什么名字？", "translation": "Siapa namamu?" },
+          { "hanzi": "今天", "pinyin": "jīntiān", "indonesian": "hari ini", "example": "今天天气很好.", "translation": "Cuaca hari ini sangat baik." },
+          { "hanzi": "九", "pinyin": "jiǔ", "indonesian": "sembilan", "example": "现在是九点.", "translation": "Sekarang jam sembilan." },
+          { "hanzi": "开", "pinyin": "kāi", "indonesian": "membuka; mengemudi", "example": "请开门.", "translation": "Tolong buka pintu." },
+          { "hanzi": "看", "pinyin": "kàn", "indonesian": "melihat; membaca", "example": "你看什么？", "translation": "Apa yang kamu lihat?" },
+          { "hanzi": "看见", "pinyin": "kànjiàn", "indonesian": "melihat", "example": "我看见你了.", "translation": "Saya melihatmu." },
+          { "hanzi": "块", "pinyin": "kuài", "indonesian": "yuan (mata uang)", "example": "这个苹果三块钱.", "translation": "Apel ini tiga yuan." },
+          { "hanzi": "来", "pinyin": "lái", "indonesian": "datang", "example": "你什么时候来？", "translation": "Kapan kamu datang?" },
+          { "hanzi": "老师", "pinyin": "lǎoshī", "indonesian": "guru", "example": "我的老师很好.", "translation": "Guru saya sangat baik." },
+          { "hanzi": "了", "pinyin": "le", "indonesian": "(partikel modal)", "example": "我吃饭了.", "translation": "Saya sudah makan." },
+          { "hanzi": "冷", "pinyin": "lěng", "indonesian": "dingin", "example": "今天很冷.", "translation": "Hari ini sangat dingin." },
+          { "hanzi": "里", "pinyin": "lǐ", "indonesian": "di dalam", "example": "书在桌子里.", "translation": "Buku ada di dalam meja." },
+          { "hanzi": "六", "pinyin": "liù", "indonesian": "enam", "example": "六点半.", "translation": "Jam setengah tujuh." },
+          { "hanzi": "妈妈", "pinyin": "māma", "indonesian": "ibu", "example": "我妈妈是老师.", "translation": "Ibu saya adalah seorang guru." },
+          { "hanzi": "吗", "pinyin": "ma", "indonesian": "(partikel tanya)", "example": "你好吗？", "translation": "Apa kabar?" },
+          { "hanzi": "买", "pinyin": "mǎi", "indonesian": "membeli", "example": "你想买什么？", "translation": "Kamu mau membeli apa?" },
+          { "hanzi": "猫", "pinyin": "māo", "indonesian": "kucing", "example": "我有一只猫.", "translation": "Saya punya satu ekor kucing." },
+          { "hanzi": "没", "pinyin": "méi", "indonesian": "tidak", "example": "我没有钱.", "translation": "Saya tidak punya uang." },
+          { "hanzi": "没关系", "pinyin": "méi guānxi", "indonesian": "tidak apa-apa", "example": "对不起. 没关系.", "translation": "Maaf. Tidak apa-apa." },
+          { "hanzi": "米饭", "pinyin": "mǐfàn", "indonesian": "nasi", "example": "我想吃米饭.", "translation": "Saya ingin makan nasi." },
+          { "hanzi": "明天", "pinyin": "míngtiān", "indonesian": "besok", "example": "明天见.", "translation": "Sampai jumpa besok." },
+          { "hanzi": "名字", "pinyin": "míngzi", "indonesian": "nama", "example": "你叫什么名字？", "translation": "Siapa namamu?" },
+          { "hanzi": "哪儿", "pinyin": "nǎr", "indonesian": "di mana", "example": "你在哪儿？", "translation": "Kamu di mana?" },
+          { "hanzi": "那", "pinyin": "nà", "indonesian": "itu", "example": "那是什么？", "translation": "Apa itu?" },
+          { "hanzi": "呢", "pinyin": "ne", "indonesian": "(partikel modal)", "example": "我很好，你呢？", "translation": "Saya baik, kalau kamu?" },
+          { "hanzi": "能", "pinyin": "néng", "indonesian": "bisa", "example": "我能帮助你吗？", "translation": "Bisa saya bantu?" },
+          { "hanzi": "你", "pinyin": "nǐ", "indonesian": "kamu", "example": "你好.", "translation": "Halo." },
+          { "hanzi": "年", "pinyin": "nián", "indonesian": "tahun", "example": "今年是2023年.", "translation": "Tahun ini adalah tahun 2023." },
+          { "hanzi": "女儿", "pinyin": "nǚ’ér", "indonesian": "anak perempuan", "example": "我有两个女儿.", "translation": "Saya punya dua anak perempuan." },
+          { "hanzi": "朋友", "pinyin": "péngyou", "indonesian": "teman", "example": "他是我朋友.", "translation": "Dia adalah teman saya." },
+          { "hanzi": "漂亮", "pinyin": "piàoliang", "indonesian": "cantik", "example": "她很漂亮.", "translation": "Dia sangat cantik." },
+          { "hanzi": "苹果", "pinyin": "píngguǒ", "indonesian": "apel", "example": "我想吃苹果.", "translation": "Saya ingin makan apel." },
+          { "hanzi": "七", "pinyin": "qī", "indonesian": "tujuh", "example": "今天星期七.", "translation": "Hari ini hari Minggu." },
+          { "hanzi": "钱", "pinyin": "qián", "indonesian": "uang", "example": "我没有钱.", "translation": "Saya tidak punya uang." },
+          { "hanzi": "前面", "pinyin": "qiánmiàn", "indonesian": "di depan", "example": "他在我前面.", "translation": "Dia di depan saya." },
+          { "hanzi": "请", "pinyin": "qǐng", "indonesian": "tolong; silakan", "example": "请坐.", "translation": "Silakan duduk." },
+          { "hanzi": "去", "pinyin": "qù", "indonesian": "pergi", "example": "我想去北京.", "translation": "Saya ingin pergi ke Beijing." },
+          { "hanzi": "热", "pinyin": "rè", "indonesian": "panas", "example": "今天很热.", "translation": "Hari ini sangat panas." },
+          { "hanzi": "人", "pinyin": "rén", "indonesian": "orang", "example": "他是一个好人.", "translation": "Dia adalah orang baik." },
+          { "hanzi": "认识", "pinyin": "rènshi", "indonesian": "mengenal", "example": "很高兴认识你.", "translation": "Senang berkenalan denganmu." },
+          { "hanzi": "三", "pinyin": "sān", "indonesian": "tiga", "example": "我有三个苹果.", "translation": "Saya punya tiga apel." },
+          { "hanzi": "商店", "pinyin": "shāngdiàn", "indonesian": "toko", "example": "我想去商店.", "translation": "Saya ingin pergi ke toko." },
+          { "hanzi": "上", "pinyin": "shàng", "indonesian": "atas; di atas", "example": "书在桌子上.", "translation": "Buku ada di atas meja." },
+          { "hanzi": "上午", "pinyin": "shàngwǔ", "indonesian": "pagi", "example": "我上午去学校.", "translation": "Saya pergi ke sekolah di pagi hari." },
+          { "hanzi": "少", "pinyin": "shǎo", "indonesian": "sedikit", "example": "我有一个少量的钱.", "translation": "Saya punya sedikit uang." },
+          { "hanzi": "谁", "pinyin": "shuí", "indonesian": "siapa", "example": "他是谁？", "translation": "Siapa dia?" },
+          { "hanzi": "什么", "pinyin": "shénme", "indonesian": "apa", "example": "这是什么？", "translation": "Apa ini?" },
+          { "hanzi": "十", "pinyin": "shí", "indonesian": "sepuluh", "example": "我今年十岁.", "translation": "Tahun ini saya berumur sepuluh tahun." },
+          { "hanzi": "时候", "pinyin": "shíhou", "indonesian": "waktu", "example": "什么时候了？", "translation": "Jam berapa sekarang?" },
+          { "hanzi": "是", "pinyin": "shì", "indonesian": "adalah", "example": "他是我爸爸.", "translation": "Dia adalah ayah saya." },
+          { "hanzi": "书", "pinyin": "shū", "indonesian": "buku", "example": "这本书很好.", "translation": "Buku ini bagus." },
+          { "hanzi": "水", "pinyin": "shuǐ", "indonesian": "air", "example": "我喝水.", "translation": "Saya minum air." },
+          { "hanzi": "水果", "pinyin": "shuǐguǒ", "indonesian": "buah", "example": "我喜欢吃水果.", "translation": "Saya suka makan buah." },
+          { "hanzi": "睡觉", "pinyin": "shuìjiào", "indonesian": "tidur", "example": "我睡觉了.", "translation": "Saya sudah tidur." },
+          { "hanzi": "说", "pinyin": "shuō", "indonesian": "berbicara", "example": "他说汉语.", "translation": "Dia berbicara Mandarin." },
+          { "hanzi": "四", "pinyin": "sì", "indonesian": "empat", "example": "我住在四楼.", "translation": "Saya tinggal di lantai empat." },
+          { "hanzi": "他", "pinyin": "tā", "indonesian": "dia (laki-laki)", "example": "他是我的朋友.", "translation": "Dia adalah teman saya." },
+          { "hanzi": "她", "pinyin": "tā", "indonesian": "dia (perempuan)", "example": "她很漂亮.", "translation": "Dia sangat cantik." },
+          { "hanzi": "太", "pinyin": "tài", "indonesian": "terlalu; sangat", "example": "太好了！", "translation": "Bagus sekali!" },
+          { "hanzi": "天气", "pinyin": "tiānqì", "indonesian": "cuaca", "example": "今天天气很好.", "translation": "Cuaca hari ini sangat baik." },
+          { "hanzi": "听", "pinyin": "tīng", "indonesian": "mendengarkan", "example": "你在听什么？", "translation": "Apa yang kamu dengarkan?" },
+          { "hanzi": "同学", "pinyin": "tóngxué", "indonesian": "teman sekelas", "example": "他是我的同学.", "translation": "Dia adalah teman sekelas saya." },
+          { "hanzi": "喂", "pinyin": "wèi", "indonesian": "halo (di telepon)", "example": "喂，你好吗？", "translation": "Halo, apa kabar?" },
+          { "hanzi": "我", "pinyin": "wǒ", "indonesian": "saya", "example": "我叫小明.", "translation": "Nama saya Xiaoming." },
+          { "hanzi": "我们", "pinyin": "wǒmen", "indonesian": "kami", "example": "我们是朋友.", "translation": "Kami adalah teman." },
+          { "hanzi": "五", "pinyin": "wǔ", "indonesian": "lima", "example": "我五岁了.", "translation": "Saya berumur lima tahun." },
+          { "hanzi": "喜欢", "pinyin": "xǐhuan", "indonesian": "suka", "example": "我喜欢吃米饭.", "translation": "Saya suka makan nasi." },
+          { "hanzi": "下", "pinyin": "xià", "indonesian": "bawah; turun", "example": "我在楼下等你.", "translation": "Saya menunggumu di bawah." },
+          { "hanzi": "下午", "pinyin": "xiàwǔ", "indonesian": "sore", "example": "我们下午去商店.", "translation": "Kami pergi ke toko sore hari." },
+          { "hanzi": "下雨", "pinyin": "xià yǔ", "indonesian": "hujan", "example": "今天下雨了.", "translation": "Hari ini hujan." },
+          { "hanzi": "先生", "pinyin": "xiānsheng", "indonesian": "tuan", "example": "这位先生是谁？", "translation": "Siapa tuan ini?" },
+          { "hanzi": "现在", "pinyin": "xiànzài", "indonesian": "sekarang", "example": "现在是三点.", "translation": "Sekarang jam tiga." },
+          { "hanzi": "想", "pinyin": "xiǎng", "indonesian": "ingin", "example": "我想回家.", "translation": "Saya ingin pulang ke rumah." },
+          { "hanzi": "小", "pinyin": "xiǎo", "indonesian": "kecil", "example": "这只猫很小.", "translation": "Kucing ini sangat kecil." },
+          { "hanzi": "小姐", "pinyin": "xiǎojiě", "indonesian": "nona", "example": "小姐，你好.", "translation": "Nona, halo." },
+          { "hanzi": "些", "pinyin": "xiē", "indonesian": "beberapa", "example": "这些书很贵.", "translation": "Buku-buku ini sangat mahal." },
+          { "hanzi": "写", "pinyin": "xiě", "indonesian": "menulis", "example": "我在写字.", "translation": "Saya sedang menulis." },
+          { "hanzi": "谢谢", "pinyin": "xièxie", "indonesian": "terima kasih", "example": "谢谢你.", "translation": "Terima kasih." },
+          { "hanzi": "星期", "pinyin": "xīngqī", "indonesian": "minggu", "example": "今天星期二.", "translation": "Hari ini hari Selasa." },
+          { "hanzi": "学生", "pinyin": "xuésheng", "indonesian": "murid", "example": "他是一名学生.", "translation": "Dia adalah seorang murid." },
+          { "hanzi": "学习", "pinyin": "xuéxí", "indonesian": "belajar", "example": "我喜欢学习汉语.", "translation": "Saya suka belajar bahasa Mandarin." },
+          { "hanzi": "学校", "pinyin": "xuéxiào", "indonesian": "sekolah", "example": "我在学校里.", "translation": "Saya di dalam sekolah." },
+          { "hanzi": "一", "pinyin": "yī", "indonesian": "satu", "example": "我有一个苹果.", "translation": "Saya punya satu apel." },
+          { "hanzi": "衣服", "pinyin": "yīfu", "indonesian": "pakaian", "example": "这件衣服很漂亮.", "translation": "Pakaian ini sangat cantik." },
+          { "hanzi": "医生", "pinyin": "yīshēng", "indonesian": "dokter", "example": "我爸爸是医生.", "translation": "Ayah saya adalah seorang dokter." },
+          { "hanzi": "医院", "pinyin": "yīyuàn", "indonesian": "rumah sakit", "example": "我去医院看病.", "translation": "Saya pergi ke rumah sakit untuk berobat." },
+          { "hanzi": "椅子", "pinyin": "yǐzi", "indonesian": "kursi", "example": "请坐在这把椅子上.", "translation": "Silakan duduk di kursi ini." },
+          { "hanzi": "有", "pinyin": "yǒu", "indonesian": "punya; ada", "example": "我有很多朋友.", "translation": "Saya punya banyak teman." },
+          { "hanzi": "月", "pinyin": "yuè", "indonesian": "bulan", "example": "今天五月二十号.", "translation": "Hari ini tanggal 20 Mei." },
+          { "hanzi": "再见", "pinyin": "zàijiàn", "indonesian": "sampai jumpa", "example": "再见！", "translation": "Sampai jumpa!" },
+          { "hanzi": "在", "pinyin": "zài", "indonesian": "di; sedang", "example": "我在学校.", "translation": "Saya di sekolah." },
+          { "hanzi": "怎么", "pinyin": "zěnme", "indonesian": "bagaimana", "example": "你怎么了？", "translation": "Ada apa denganmu?" },
+          { "hanzi": "怎么样", "pinyin": "zěnmeyàng", "indonesian": "bagaimana", "example": "这个电影怎么样？", "translation": "Bagaimana film ini?" },
+          { "hanzi": "这", "pinyin": "zhè", "indonesian": "ini", "example": "这是我的书.", "translation": "Ini adalah buku saya." },
+          { "hanzi": "中国", "pinyin": "Zhōngguó", "indonesian": "Tiongkok", "example": "我喜欢中国.", "translation": "Saya suka Tiongkok." },
+          { "hanzi": "中午", "pinyin": "zhōngwǔ", "indonesian": "siang", "example": "我们中午吃饭.", "translation": "Kami makan siang." },
+          { "hanzi": "住", "pinyin": "zhù", "indonesian": "tinggal", "example": "你住在哪里？", "translation": "Kamu tinggal di mana?" },
+          { "hanzi": "桌子", "pinyin": "zhuōzi", "indonesian": "meja", "example": "书在桌子上.", "translation": "Buku ada di atas meja." },
+          { "hanzi": "字", "pinyin": "zì", "indonesian": "karakter; tulisan", "example": "这个字怎么写？", "translation": "Bagaimana cara menulis karakter ini?" },
+          { "hanzi": "坐", "pinyin": "zuò", "indonesian": "duduk", "example": "请坐.", "translation": "Silakan duduk." },
+          { "hanzi": "做", "pinyin": "zuò", "indonesian": "melakukan; membuat", "example": "你在做什么？", "translation": "Apa yang sedang kamu lakukan?" }
+      ];
+
+      // --- Slideshow Logic ---
+      const slideshowContainer = document.getElementById("slideshow-container");
+      let currentSlideIndex = 0;
+      let totalSlides;
+      let isAnimating = false;
+      const wordsPerSlide = 6;
+      
+      const vocabularySlides = [];
+      for (let i = 0; i < vocabularyData.length; i += wordsPerSlide) {
+          const slideWords = vocabularyData.slice(i, i + wordsPerSlide);
+          vocabularySlides.push({
+              type: 'vocabulary',
+              words: slideWords
+          });
+      }
+      
+      const allSlides = [
+          { type: 'title', title: 'Selamat Datang!', hanzi: '欢迎来到HSK 1词汇课!', pinyin: 'Huānyíng lái dào HSK 1 cíhuì kè!' },
+          { type: 'agenda', title: 'Mempelajari HSK 1', hanzi: '学习 HSK 1', pinyin: 'Xuéxí HSK 1' },
+          { type: 'section', title: 'Kosakata', subtitle: '生词 (Shēngcí)', icon: '词' },
+          ...vocabularySlides,
+          { type: 'section', title: 'Ulasan & Penutup', subtitle: '总结 (Zǒngjié)', icon: '复' },
+          { type: 'summary', title: 'Ulasan Singkat Hari Ini' },
+          { type: 'closing', title: 'Terima Kasih!', hanzi: '谢谢! (Xièxiè!)' },
+          { type: 'qa', title: 'Ada Pertanyaan?', hanzi: '有问题吗？ (Yǒu wèntí ma?)' }
+      ];
+      totalSlides = allSlides.length;
+
+      function createSlideElement(slideData) {
+          const slide = document.createElement('div');
+          slide.className = 'slide p-8 md:p-12 flex flex-col justify-center items-center text-center bg-white/60 backdrop-blur-xl rounded-3xl border border-white/30 shadow-2xl';
+          
+          if (slideData.type === 'title') {
+              slide.innerHTML = `
+                  <h1 class="anim-el text-5xl md:text-7xl font-bold text-indigo-600 mb-4">
+                      ${slideData.title}
+                  </h1>
+                  <h2 class="anim-el text-4xl md:text-6xl font-bold text-slate-800">
+                      ${slideData.hanzi}
+                  </h2>
+                  <h3 class="anim-el text-2xl md:text-3xl text-slate-500 mt-2">
+                      (${slideData.pinyin})
+                  </h3>
+              `;
+          } else if (slideData.type === 'agenda') {
+              slide.innerHTML = `
+                  <h3 class="anim-el text-4xl md:text-5xl font-bold mb-2 text-slate-800">
+                      ${slideData.title}
+                  </h3>
+                  <h4 class="anim-el text-2xl md:text-3xl text-slate-500 mb-8">
+                      (${slideData.hanzi} - ${slideData.pinyin})
+                  </h4>
+                  <ol class="anim-el text-xl md:text-3xl text-left space-y-4 text-slate-700">
+                      <li class="flex items-center">
+                          <span class="text-blue-500 mr-3 font-bold">1.</span> Kosakata
+                          (生词)
+                      </li>
+                      <li class="flex items-center">
+                          <span class="text-green-500 mr-3 font-bold">2.</span> Latihan
+                          (练习)
+                      </li>
+                      <li class="flex items-center">
+                          <span class="text-purple-500 mr-3 font-bold">3.</span> Ringkasan
+                          (总结)
+                      </li>
+                  </ol>
+              `;
+          } else if (slideData.type === 'section') {
+              slide.innerHTML = `
+                  <img
+                      src="https://placehold.co/100x100/3b82f6/FFFFFF?text=${slideData.icon}"
+                      alt="${slideData.title} Icon"
+                      class="anim-el w-20 h-20 mb-6 rounded-full shadow-lg"
+                  />
+                  <h2 class="anim-el text-4xl md:text-5xl font-bold text-blue-600">
+                      Bagian 1: ${slideData.title}
+                  </h2>
+                  <p class="anim-el text-3xl text-slate-500 mt-2">生词 (Shēngcí)</p>
+              `;
+          } else if (slideData.type === 'vocabulary') {
+              const half = Math.ceil(slideData.words.length / 2);
+              const firstHalf = slideData.words.slice(0, half);
+              const secondHalf = slideData.words.slice(half);
+
+              const listItems1 = firstHalf.map(word => `
+                  <li class="anim-el">
+                      <p>
+                          <span class="hanzi md:text-2xl text-slate-800">${word.hanzi} (${word.pinyin})</span>
+                          <span class="text-slate-600 md:text-2xl">- ${word.indonesian}</span>
+                      </p>
+                      <div class="mt-2 p-3 pl-4 border-l-4 border-blue-500 bg-slate-100/50 rounded-r-lg">
+                          <span class="hanzi text-slate-800 text-base">${word.example}</span><br />
+                          <span class="translation text-slate-700">${word.translation}</span>
+                      </div>
+                  </li>
+              `).join('');
+
+              const listItems2 = secondHalf.map(word => `
+                  <li class="anim-el">
+                      <p>
+                          <span class="hanzi md:text-2xl text-slate-800">${word.hanzi} (${word.pinyin})</span>
+                          <span class="text-slate-600 md:text-2xl">- ${word.indonesian}</span>
+                      </p>
+                      <div class="mt-2 p-3 pl-4 border-l-4 border-blue-500 bg-slate-100/50 rounded-r-lg">
+                          <span class="hanzi text-slate-800 text-base">${word.example}</span><br />
+                          <span class="translation text-slate-700">${word.translation}</span>
+                      </div>
+                  </li>
+              `).join('');
+              
+              slide.classList.remove('text-center');
+              slide.classList.add('items-start');
+              slide.innerHTML = `
+                  <h2 class="anim-el text-3xl md:text-5xl font-bold mb-8 self-center text-blue-600 flex-shrink-0">
+                      Kosakata
+                  </h2>
+                  <div class="w-full flex-grow overflow-y-auto custom-scrollbar pr-4">
+                      <div class="flex w-full space-x-12">
+                          <ul class="space-y-8 text-lg w-1/2">${listItems1}</ul>
+                          <ul class="space-y-8 text-lg w-1/2">${listItems2}</ul>
+                      </div>
+                  </div>
+              `;
+          } else if (slideData.type === 'summary') {
+              const summaryVocab = vocabularyData.slice(0, 4);
+              slide.innerHTML = `
+                  <h2 class="anim-el text-3xl md:text-5xl font-bold mb-6 text-slate-600">
+                      Ulasan Singkat Hari Ini
+                  </h2>
+                  <div class="flex w-full justify-around text-slate-700 text-xl">
+                      <div class="anim-el text-left">
+                          <h3 class="font-bold text-lg mb-2">Kosakata Kunci:</h3>
+                          <ul class="list-disc md:text-3xl list-inside">
+                              ${summaryVocab.map(word => `<li>${word.hanzi} (${word.pinyin})</li>`).join('')}
+                          </ul>
+                      </div>
+                      <div class="anim-el text-left">
+                          <h3 class="font-bold text-lg mb-2">Tata Bahasa:</h3>
+                          <ul class="list-disc md:text-3xl list-inside">
+                              <li>Partikel 了 (le)</li>
+                              <li>Kalimat 把 (bǎ)</li>
+                              <li>Perbandingan 比 (bǐ)</li>
+                              <li>Struktur 的 (de)</li>
+                          </ul>
+                      </div>
+                  </div>
+              `;
+          } else if (slideData.type === 'closing') {
+              slide.innerHTML = `
+                  <h1 class="anim-el text-5xl md:text-5xl font-bold text-indigo-600 mb-4">
+                      ${slideData.title}
+                  </h1>
+                  <h2 class="anim-el text-4xl md:text-4xl font-bold text-slate-800">
+                      ${slideData.hanzi}
+                  </h2>
+                  <h3 class="anim-el text-2xl md:text-4xl text-slate-600 mt-8">
+                      Pelajaran hari ini selesai.
+                  </h3>
+                  <h4 class="anim-el text-xl md:text-4xl text-slate-500">(今天的课就到这里。)</h4>
+              `;
+          } else if (slideData.type === 'qa') {
+              slide.innerHTML = `
+                  <h2 class="anim-el text-3xl md:text-5xl font-bold text-slate-800 mb-4">
+                      ${slideData.title}
+                  </h2>
+                  <p class="anim-el hanzi md:text-5xl text-2xl">${slideData.hanzi}</p>
+                  <p class="anim-el mt-8 text-lg text-slate-600">
+                      Untuk informasi lebih lanjut tentang kelas kami, silakan hubungi:
+                  </p>
+                  <p class="anim-el font-semibold text-indigo-600 mt-2">
+                      info@kelasmandarin.com
+                  </p>
+              `;
+          }
+          return slide;
+      }
+      
+      function initSlides() {
+          slideshowContainer.innerHTML = '';
+          allSlides.forEach((slideData, index) => {
+              const slideEl = createSlideElement(slideData);
+              slideshowContainer.appendChild(slideEl);
+              if (index === 0) {
+                  slideEl.style.visibility = 'visible';
+              }
+          });
+          totalSlides = slideshowContainer.querySelectorAll('.slide').length;
+      }
+
+      function animateSlideIn(slide) {
+        const elements = slide.querySelectorAll(".anim-el");
+        const tl = gsap.timeline({ onComplete: () => (isAnimating = false) });
+        
+        tl.fromTo(
+          slide,
+          { autoAlpha: 0, scale: 1.03 },
+          { autoAlpha: 1, scale: 1, duration: 0.6, ease: "power2.out" }
+        );
+
+        if (elements.length > 0) {
+          tl.fromTo(
+            elements,
+            { opacity: 0, y: 20 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.5,
+              stagger: 0.08,
+              ease: "power2.out",
+            },
+            "-=0.4"
+          );
+        }
+      }
+
+      function animateSlideOut(slide, onComplete) {
+        gsap.to(slide, {
+          autoAlpha: 0,
+          scale: 0.97,
+          duration: 0.5,
+          ease: "power2.in",
+          onComplete: onComplete,
+        });
+      }
+
+      function showSlide(index) {
+        if (isAnimating || index < 0 || index >= totalSlides) return;
+        isAnimating = true;
+
+        const slides = slideshowContainer.querySelectorAll('.slide');
+        const oldSlide = slides[currentSlideIndex];
+        
+        drawingManager.saveDrawing(currentSlideIndex);
+
+        animateSlideOut(oldSlide, () => {
+          oldSlide.style.visibility = 'hidden';
+          currentSlideIndex = index;
+          const newSlide = slides[currentSlideIndex];
+          newSlide.style.visibility = 'visible';
+          animateSlideIn(newSlide);
+          drawingManager.loadDrawing(currentSlideIndex);
+        });
+      }
+
+      slideshowContainer.addEventListener("click", (event) => {
+        if (drawingManager.drawingMode !== 'none') return; // Don't navigate while drawing
+        
+        const rect = slideshowContainer.getBoundingClientRect();
+        const clickX = event.clientX - rect.left;
+
+        if (clickX > rect.width / 2) {
+          showSlide(currentSlideIndex + 1);
+        } else {
+          showSlide(currentSlideIndex - 1);
+        }
+      });
+      
+      const penButton = document.getElementById('pen-button');
+      const eraserButton = document.getElementById('eraser-button');
+      const clearButton = document.getElementById('clear-button');
+      const neutralButton = document.getElementById('neutral-button');
+
+      penButton.addEventListener('click', () => {
+          drawingManager.setMode('pen');
+      });
+      
+      eraserButton.addEventListener('click', () => {
+          drawingManager.setMode('line-eraser'); // Set mode for line-based erasing
+      });
+      
+      clearButton.addEventListener('click', () => {
+          drawingManager.clearCanvas();
+      });
+
+      neutralButton.addEventListener('click', () => {
+          drawingManager.setMode('none');
+      });
+
+      // DrawingManager Class to handle canvas drawing
+      class DrawingManager {
+          constructor(container, slideshow) {
+              this.container = container;
+              this.slideshow = slideshow;
+              this.canvas = document.createElement('canvas');
+              this.ctx = this.canvas.getContext('2d');
+              this.drawing = false;
+              this.lines = new Map(); // Store lines as an array of points
+              this.drawingMode = 'none'; // 'none', 'pen', 'line-eraser'
+              this.penColor = '#1e293b';
+              this.penWidth = 4;
+              this.proximityThreshold = 10; // Pixels to detect a line
+
+              this.initCanvas();
+              this.addEventListeners();
+          }
+
+          initCanvas() {
+              this.canvas.id = 'drawing-canvas';
+              this.container.appendChild(this.canvas);
+              window.addEventListener('resize', () => this.resizeCanvas());
+              this.resizeCanvas();
+          }
+
+          resizeCanvas() {
+              const currentData = this.canvas.toDataURL(); // Save old data
+              const rect = this.container.getBoundingClientRect();
+              this.canvas.width = rect.width;
+              this.canvas.height = rect.height;
+
+              // Redraw content from stored lines
+              this.redraw(this.slideshow.currentSlideIndex);
+          }
+
+          addEventListeners() {
+              this.canvas.addEventListener('mousedown', (e) => this.handleCanvasInteraction(e));
+              this.canvas.addEventListener('mousemove', (e) => this.handleCanvasInteraction(e));
+              this.canvas.addEventListener('mouseup', () => this.stopDrawing());
+              this.canvas.addEventListener('mouseout', () => this.stopDrawing());
+              
+              this.canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                this.handleCanvasInteraction(e.touches[0]);
+              });
+              this.canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                this.handleCanvasInteraction(e.touches[0]);
+              });
+              this.canvas.addEventListener('touchend', () => this.stopDrawing());
+          }
+          
+          handleCanvasInteraction(e) {
+              const rect = this.canvas.getBoundingClientRect();
+              const x = e.clientX - rect.left;
+              const y = e.clientY - rect.top;
+
+              if (this.drawingMode === 'pen') {
+                  if (e.type === 'mousedown' || e.type === 'touchstart') {
+                      this.startDrawing(x, y);
+                  } else if (e.type === 'mousemove' || e.type === 'touchmove') {
+                      this.draw(x, y);
+                  }
+              } else if (this.drawingMode === 'line-eraser') {
+                  if (e.type === 'mousedown' || e.type === 'touchstart') {
+                      this.eraseLine(x, y);
+                  }
+              }
+          }
+
+          startDrawing(x, y) {
+              this.drawing = true;
+              const currentLines = this.lines.get(this.slideshow.currentSlideIndex) || [];
+              currentLines.push({ points: [{ x, y }] });
+              this.lines.set(this.slideshow.currentSlideIndex, currentLines);
+              this.redraw(this.slideshow.currentSlideIndex);
+          }
+
+          draw(x, y) {
+              if (!this.drawing || this.drawingMode !== 'pen') return;
+              const currentLines = this.lines.get(this.slideshow.currentSlideIndex);
+              if (currentLines.length > 0) {
+                  currentLines[currentLines.length - 1].points.push({ x, y });
+                  this.redraw(this.slideshow.currentSlideIndex);
+              }
+          }
+
+          stopDrawing() {
+              if (!this.drawing) return;
+              this.drawing = false;
+          }
+          
+          eraseLine(x, y) {
+              const currentLines = this.lines.get(this.slideshow.currentSlideIndex) || [];
+              let lineToRemove = -1;
+
+              for (let i = 0; i < currentLines.length; i++) {
+                  const line = currentLines[i];
+                  for (let j = 0; j < line.points.length - 1; j++) {
+                      const p1 = line.points[j];
+                      const p2 = line.points[j+1];
+
+                      const distance = this.pointToLineDistance(x, y, p1.x, p1.y, p2.x, p2.y);
+                      if (distance < this.proximityThreshold) {
+                          lineToRemove = i;
+                          break;
+                      }
+                  }
+                  if (lineToRemove !== -1) {
+                      break;
+                  }
+              }
+
+              if (lineToRemove !== -1) {
+                  currentLines.splice(lineToRemove, 1);
+                  this.lines.set(this.slideshow.currentSlideIndex, currentLines);
+                  this.redraw(this.slideshow.currentSlideIndex);
+              }
+          }
+          
+          pointToLineDistance(px, py, x1, y1, x2, y2) {
+            const A = px - x1;
+            const B = py - y1;
+            const C = x2 - x1;
+            const D = y2 - y1;
+
+            const dot = A * C + B * D;
+            const len_sq = C * C + D * D;
+            let param = -1;
+            if (len_sq !== 0) {
+              param = dot / len_sq;
+            }
+
+            let xx, yy;
+
+            if (param < 0) {
+              xx = x1;
+              yy = y1;
+            } else if (param > 1) {
+              xx = x2;
+              yy = y2;
+            } else {
+              xx = x1 + param * C;
+              yy = y1 + param * D;
+            }
+
+            const dx = px - xx;
+            const dy = py - yy;
+            return Math.sqrt(dx * dx + dy * dy);
+          }
+
+          redraw(slideIndex) {
+              this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+              const currentLines = this.lines.get(slideIndex) || [];
+
+              currentLines.forEach(line => {
+                  if (line.points.length < 2) return;
+                  this.ctx.beginPath();
+                  this.ctx.lineWidth = this.penWidth;
+                  this.ctx.strokeStyle = this.penColor;
+                  this.ctx.globalCompositeOperation = 'source-over';
+                  this.ctx.lineCap = 'round';
+                  this.ctx.moveTo(line.points[0].x, line.points[0].y);
+                  for (let i = 1; i < line.points.length; i++) {
+                      this.ctx.lineTo(line.points[i].x, line.points[i].y);
+                  }
+                  this.ctx.stroke();
+              });
+          }
+
+          setMode(mode) {
+              this.drawingMode = mode;
+              const body = document.body;
+              body.classList.toggle('drawing-active', mode !== 'none');
+              
+              document.querySelectorAll('.drawing-controls button').forEach(btn => btn.classList.remove('active'));
+              if (mode === 'pen') {
+                penButton.classList.add('active');
+              } else if (mode === 'line-eraser') {
+                eraserButton.classList.add('active');
+              } else if (mode === 'none') {
+                neutralButton.classList.add('active');
+              }
+          }
+
+          clearCanvas() {
+              this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+              this.lines.delete(this.slideshow.currentSlideIndex);
+          }
+
+          saveDrawing(slideIndex) {
+              this.lines.set(slideIndex, this.lines.get(slideIndex) || []);
+          }
+          
+          loadDrawing(slideIndex) {
+              this.redraw(slideIndex);
+          }
+      }
+
+      // --- Particles.js Configuration ---
+      particlesJS("particles-js", {
+        particles: {
+          number: { value: 80, density: { enable: true, value_area: 800 } },
+          color: { value: "#ffffff" },
+          shape: {
+            type: "circle",
+            stroke: { width: 0, color: "#000000" },
+            polygon: { nb_sides: 5 },
+          },
+          opacity: {
+            value: 0.5,
+            random: false,
+            anim: { enable: false, speed: 1, opacity_min: 0.1, sync: false },
+          },
+          size: {
+            value: 3,
+            random: true,
+            anim: { enable: false, speed: 40, size_min: 0.1, sync: false },
+          },
+          line_linked: {
+            enable: true,
+            distance: 150,
+            color: "#ffffff",
+            opacity: 0.4,
+            width: 1,
+          },
+          move: {
+            enable: true,
+            speed: 2,
+            direction: "none",
+            random: false,
+            straight: false,
+            out_mode: "out",
+            bounce: false,
+            attract: { enable: false, rotateX: 600, rotateY: 1200 },
+          },
+        },
+        interactivity: {
+          detect_on: "canvas",
+          events: {
+            onhover: { enable: true, mode: "repulse" },
+            onclick: { enable: false },
+            resize: true,
+          },
+          modes: { repulse: { distance: 100, duration: 0.4 } },
+        },
+        retina_detect: true,
+      });
+
+      let drawingManager;
+
+      function init() {
+        initSlides();
+        const firstSlide = slideshowContainer.querySelectorAll('.slide')[0];
+        gsap.set(firstSlide.querySelectorAll(".anim-el"), { opacity: 0, y: 20 });
+        isAnimating = true;
+        animateSlideIn(firstSlide);
+        
+        // Pass the actual object with a modifiable property
+        drawingManager = new DrawingManager(slideshowContainer, { get currentSlideIndex() { return currentSlideIndex; } });
+        drawingManager.setMode('none'); // Set initial mode to none
+      }
+
+      window.addEventListener("load", init);
+    </script>
+  </body>
+</html>
