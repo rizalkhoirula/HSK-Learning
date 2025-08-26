@@ -5,19 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HSK Vocabulary Slideshow</title>
 
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- GSAP Animation Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
-    <!-- Fonts -->
+    <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
+
     <link
       href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
 
-    <!-- Custom CSS -->
     <style>
       body {
         font-family: "Inter", sans-serif;
@@ -96,12 +94,10 @@
     <div id="particles-js"></div>
 
     <div class="w-full h-full flex items-center justify-center p-4 md:p-6 z-10">
-      <!-- Slideshow Container -->
       <div
         id="slideshow-container"
         class="relative w-full h-full max-w-screen-2xl rounded-3xl cursor-pointer"
       >
-        <!-- Slides will be dynamically inserted here -->
         <div
           class="slide p-8 md:p-12 flex flex-col justify-center items-center text-center bg-white/60 backdrop-blur-xl rounded-3xl border border-white/30 shadow-2xl"
           style="visibility: visible"
@@ -110,7 +106,6 @@
         </div>
       </div>
 
-      <!-- Drawing Controls -->
       <div
         class="drawing-controls absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-4 p-2 bg-white/80 backdrop-blur-md rounded-full shadow-lg z-50"
       >
@@ -216,7 +211,6 @@
       Copyright &copy; NihaoBeijing Rizal 莉莎
     </footer>
 
-    <!-- Particles.js CDN -->
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script>
       // --- Global State ---
@@ -226,77 +220,88 @@
       let allSlidesData = [];
       let isAnimating = false;
       let drawingManager;
+      let hanziWriters = {}; // Stores one writer instance PER CHARACTER
 
-      // --- Main Function to Fetch Data and Initialize ---
+      // --- Main Initializer ---
       async function main() {
         try {
           const response = await fetch("materi.json");
-          if (!response.ok) {
+          if (!response.ok)
             throw new Error(`Gagal memuat file: ${response.statusText}`);
-          }
           const data = await response.json();
-          // Although the JSON file should be correct, this function ensures any lingering errors are fixed.
           const correctedData = correctHanziData(data);
+
+          showLoadingMessage("Memuat data animasi karakter...");
+          await preloadHanziData(correctedData);
+
           initializeSlideshow(correctedData);
         } catch (error) {
-          console.error("Tidak dapat memuat data materi:", error);
-          slideshowContainer.innerHTML = `<div class="slide p-8 md:p-12 flex flex-col justify-center items-center text-center bg-white/60 backdrop-blur-xl rounded-3xl border border-white/30 shadow-2xl" style="visibility: visible;"><h1 class="text-3xl font-bold text-red-600">Error</h1><p class="mt-4 text-slate-700">${error.message}</p></div>`;
+          console.error("Gagal memulai aplikasi:", error);
+          showErrorMessage(
+            "Gagal memuat data. Periksa koneksi internet Anda dan segarkan halaman."
+          );
         }
       }
 
-      // --- Text-to-Speech Function ---
-      function speak(text, lang = "zh-CN") {
-        if ('speechSynthesis' in window) {
-          // Cancel any previous speech to allow for immediate replay
-          speechSynthesis.cancel();
+      // --- UI State Helpers ---
+      function showLoadingMessage(message) {
+        slideshowContainer.innerHTML = `<div class="slide p-8 flex justify-center items-center text-center bg-white/60 backdrop-blur-xl rounded-3xl" style="visibility: visible;"><h1 class="text-3xl font-bold text-slate-700">${message}</h1></div>`;
+      }
+      function showErrorMessage(message) {
+        slideshowContainer.innerHTML = `<div class="slide p-8 flex justify-center items-center text-center bg-white/60 backdrop-blur-xl rounded-3xl" style="visibility: visible;"><h1 class="text-3xl font-bold text-red-600">Error</h1><p class="mt-4 text-slate-700">${message}</p></div>`;
+      }
 
-          // Create a new utterance
-          const utterance = new SpeechSynthesisUtterance(text);
-          
-          // Get available voices
-          const voices = speechSynthesis.getVoices();
-          const chineseVoice = voices.find(voice => voice.lang.startsWith(lang));
-
-          if (chineseVoice) {
-            utterance.voice = chineseVoice;
-          } else {
-            // If the desired voice isn't found, we'll rely on the browser's language selection.
-            // This is a common scenario as voice loading can be asynchronous.
-            console.warn(`Voice for '${lang}' not found. Using browser default.`);
+      // --- Hanzi Data & Animation Logic (FIXED) ---
+      function preloadHanziData(data) {
+        const allChars = new Set();
+        for (const levelKey in data) {
+          if (data[levelKey].words) {
+            data[levelKey].words.forEach((word) => {
+              for (const char of word.hanzi) allChars.add(char);
+            });
           }
-          
+        }
+        console.log(
+          `Preloading data for ${allChars.size} unique characters...`
+        );
+        const promises = Array.from(allChars).map((char) =>
+          HanziWriter.loadCharacterData(char).catch((err) =>
+            console.warn(`Gagal memuat data untuk karakter: ${char}`, err)
+          )
+        );
+        return Promise.all(promises);
+      }
+
+      async function animateWord(hanzi) {
+        if (isAnimating) return;
+        isAnimating = true;
+        for (const char of hanzi) {
+          if (hanziWriters[char]) {
+            await hanziWriters[char].animateCharacter();
+          }
+        }
+        isAnimating = false;
+      }
+
+      // --- Text-to-Speech ---
+      function speak(text, lang = "zh-CN") {
+        if ("speechSynthesis" in window) {
+          speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance(text);
+          const voices = speechSynthesis.getVoices();
+          const chineseVoice = voices.find((voice) =>
+            voice.lang.startsWith(lang)
+          );
+          if (chineseVoice) utterance.voice = chineseVoice;
           utterance.lang = lang;
           speechSynthesis.speak(utterance);
-        } else {
-          console.error('Speech synthesis not supported in this browser.');
-          // Fallback to the old method if needed
-          playAudio(text, lang); 
         }
       }
-
-      // Pre-load voices when the page loads
-      if ('speechSynthesis' in window) {
-        speechSynthesis.onvoiceschanged = () => {
-          // This event fires when the voice list is ready.
-          // We can log them to see what's available.
-          console.log("Voices loaded:", speechSynthesis.getVoices().map(v => v.name));
-        };
+      if ("speechSynthesis" in window) {
+        speechSynthesis.onvoiceschanged = () => console.log("Voices loaded.");
       }
 
-      function playAudio(text, lang = "zh-CN") {
-        try {
-          // This uses an unofficial Google Translate TTS endpoint as a fallback.
-          const url = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&q=${encodeURIComponent(
-            text
-          )}&tl=${lang}`;
-          const audio = new Audio(url);
-          audio.play();
-        } catch (error) {
-          console.error("Gagal memutar audio:", error);
-        }
-      }
-
-      // --- Data Processing and Slide Generation ---
+      // --- Data Processing & Slide Generation ---
       const hanziCorrections = {
         shēngbìng: "生病",
         wèntí: "问题",
@@ -325,14 +330,12 @@
         yángé: "严格",
         shìyìng: "适应",
       };
-
       function correctHanziData(data) {
         for (const hskLevel in data) {
           if (data[hskLevel].words) {
             data[hskLevel].words.forEach((word) => {
-              if (hanziCorrections[word.pinyin]) {
+              if (hanziCorrections[word.pinyin])
                 word.hanzi = hanziCorrections[word.pinyin];
-              }
             });
           }
         }
@@ -341,8 +344,6 @@
 
       function buildSlidesFromData(data) {
         let slides = [];
-
-        // 1. Intro Slides
         slides.push({
           type: "title",
           title: "Selamat Datang Di Kelas Trial!",
@@ -350,48 +351,33 @@
           pinyin: "Huānyíng lái dào HSK xuéxí!",
         });
         slides.push({ type: "agenda" });
-
-        // 2. Loop through HSK levels
         const hskLevels = ["HSK2", "HSK3", "HSK4"];
         hskLevels.forEach((level) => {
           if (data[level]) {
-            // Section slide for Words
             slides.push({
               type: "section",
               title: `${level} Kosakata`,
               subtitle: "生词 (Shēngcí)",
               icon: "词",
             });
-
-            // Vocabulary slides (ONE WORD PER SLIDE)
-            const words = data[level].words;
-            words.forEach((word) => {
-              slides.push({ type: "vocabulary_word", word: word });
-            });
-
-            // Section slide for Dialogs
+            data[level].words.forEach((word) =>
+              slides.push({ type: "vocabulary_word", word: word })
+            );
             const dialogs =
               data[level].dialog_transition || data[level].dialog_ending;
-            if (dialogs && dialogs.length > 0) {
+            if (dialogs?.length > 0) {
               slides.push({
                 type: "section",
                 title: `${level} Dialog`,
                 subtitle: "对话 (Duìhuà)",
                 icon: "话",
               });
-              // Dialog slides
-              dialogs.forEach((dialog) => {
-                slides.push({
-                  type: "dialog",
-                  topic: dialog.topic,
-                  conversation: dialog.conversation,
-                });
-              });
+              dialogs.forEach((dialog) =>
+                slides.push({ type: "dialog", ...dialog })
+              );
             }
           }
         });
-
-        // 3. Outro Slides
         slides.push({
           type: "closing",
           title: "Terima Kasih!",
@@ -402,7 +388,6 @@
           title: "Ada Pertanyaan?",
           hanzi: "有问题吗？ (Yǒu wèntí ma?)",
         });
-
         return slides;
       }
 
@@ -410,163 +395,92 @@
         const slide = document.createElement("div");
         slide.className =
           "slide p-8 md:p-12 flex flex-col justify-center items-center text-center bg-white/60 backdrop-blur-xl rounded-3xl border border-white/30 shadow-2xl";
-
-        const logoImg = document.createElement('img');
-        logoImg.src = 'logo.png';
-        logoImg.alt = 'Logo';
-        logoImg.className = 'absolute top-6 right-6 w-20 h-auto opacity-75'; // Tailwind classes for styling
-        slide.appendChild(logoImg);
-        
-        let slideContent = '';
-
+        let slideContent = "";
         if (slideData.type === "title") {
-          slideContent = `
-                <h1 class="anim-el text-5xl md:text-7xl font-bold text-indigo-600 mb-4">${slideData.title}</h1>
-                <h2 class="anim-el text-4xl md:text-6xl font-bold text-slate-800 hanzi">${slideData.hanzi}</h2>
-                <h3 class="anim-el text-2xl md:text-3xl text-slate-500 mt-2">(${slideData.pinyin})</h3>
-            `;
+          slideContent = `<h1 class="anim-el text-5xl md:text-7xl font-bold text-indigo-600 mb-4">${slideData.title}</h1><h2 class="anim-el text-4xl md:text-6xl font-bold text-slate-800 hanzi">${slideData.hanzi}</h2><h3 class="anim-el text-2xl md:text-3xl text-slate-500 mt-2">(${slideData.pinyin})</h3>`;
         } else if (slideData.type === "agenda") {
-          slideContent = `
-                <h3 class="anim-el text-4xl md:text-5xl font-bold mb-8 text-slate-800">Agenda Hari Ini</h3>
-                <ol class="anim-el text-xl md:text-3xl text-left space-y-4 text-slate-700">
-                    <li class="flex items-center"><span class="text-blue-500 mr-3 font-bold">1.</span> Kosakata HSK 2-4 (<span class="hanzi">生词</span>)</li>
-                    <li class="flex items-center"><span class="text-green-500 mr-3 font-bold">2.</span> Contoh Dialog (<span class="hanzi">对话</span>)</li>
-                    <li class="flex items-center"><span class="text-purple-500 mr-3 font-bold">3.</span> Tanya Jawab (<span class="hanzi">问答</span>)</li>
-                </ol>
-            `;
+          slideContent = `<h3 class="anim-el text-4xl md:text-5xl font-bold mb-8 text-slate-800">Agenda Hari Ini</h3><ol class="anim-el text-xl md:text-3xl text-left space-y-4 text-slate-700"><li class="flex items-center"><span class="text-blue-500 mr-3 font-bold">1.</span> Kosakata HSK 2-4 (<span class="hanzi">生词</span>)</li><li class="flex items-center"><span class="text-green-500 mr-3 font-bold">2.</span> Contoh Dialog (<span class="hanzi">对话</span>)</li><li class="flex items-center"><span class="text-purple-500 mr-3 font-bold">3.</span> Tanya Jawab (<span class="hanzi">问答</span>)</li></ol>`;
         } else if (slideData.type === "section") {
-          slideContent = `
-                <img src="https://placehold.co/100x100/6366f1/FFFFFF?text=${encodeURIComponent(
-                  slideData.icon
-                )}" alt="${
+          slideContent = `<img src="https://placehold.co/100x100/6366f1/FFFFFF?text=${encodeURIComponent(
+            slideData.icon
+          )}" alt="${
             slideData.title
-          } Icon" class="anim-el w-24 h-24 mb-6 rounded-full shadow-lg"/>
-                <h2 class="anim-el text-4xl md:text-6xl font-bold text-indigo-600">${
-                  slideData.title
-                }</h2>
-                <p class="anim-el text-3xl text-slate-500 mt-2 hanzi">${
-                  slideData.subtitle
-                }</p>
-            `;
+          } Icon" class="anim-el w-24 h-24 mb-6 rounded-full shadow-lg"/><h2 class="anim-el text-4xl md:text-6xl font-bold text-indigo-600">${
+            slideData.title
+          }</h2><p class="anim-el text-3xl text-slate-500 mt-2 hanzi">${
+            slideData.subtitle
+          }</p>`;
         } else if (slideData.type === "vocabulary_word") {
-          const word = slideData.word;
+          const { word } = slideData;
           const examplesHtml = word.examples
             .map(
-              (ex) => `
-                <div class="text-left p-3 rounded-lg bg-slate-100/60 flex items-center justify-between gap-4">
-                    <div>
-                        <p class="hanzi text-xl text-slate-800">${ex.hanzi}</p>
-                        <p class="pinyin text-base text-slate-500">${ex.pinyin}</p>
-                        <p class="translation text-base text-indigo-600">${ex.indonesian}</p>
-                    </div>
-                    <button onclick="event.stopPropagation(); speak('${ex.hanzi}')" class="p-2 rounded-full text-sky-500 hover:bg-sky-100 transition-colors flex-shrink-0">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M15 8a5 5 0 0 1 0 8"></path><path d="M17.7 5a9 9 0 0 1 0 14"></path><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"></path></svg>
-                    </button>
-                </div>
-            `
+              (ex) =>
+                `<div class="text-left p-3 rounded-lg bg-slate-100/60 flex items-center justify-between gap-4"><div><p class="hanzi text-xl text-slate-800">${ex.hanzi}</p><p class="pinyin text-base text-slate-500">${ex.pinyin}</p><p class="translation text-base text-indigo-600">${ex.indonesian}</p></div><button onclick="event.stopPropagation(); speak('${ex.hanzi}')" class="p-2 rounded-full text-sky-500 hover:bg-sky-100 transition-colors flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M15 8a5 5 0 0 1 0 8"></path><path d="M17.7 5a9 9 0 0 1 0 14"></path><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"></path></svg></button></div>`
             )
             .join("");
-
-          slideContent = `
-                <div class="anim-el w-full flex flex-col items-center justify-center text-center">
-                    <div class="flex items-center justify-center gap-x-4">
-                        <h1 class="hanzi text-7xl md:text-8xl font-bold text-slate-800">${word.hanzi}</h1>
-                        <button onclick="event.stopPropagation(); speak('${word.hanzi}')" class="p-3 rounded-full text-sky-500 hover:bg-sky-100 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M15 8a5 5 0 0 1 0 8"></path><path d="M17.7 5a9 9 0 0 1 0 14"></path><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"></path></svg>
-                        </button>
-                    </div>
-                    <h2 class="pinyin text-3xl md:text-4xl text-slate-600 mt-2 mb-4">${word.pinyin}</h2>
-                    <h3 class="text-2xl md:text-3xl font-semibold text-indigo-600 capitalize">${word.indonesian}</h3>
-                </div>
-                <div class="anim-el w-full max-w-3xl mt-4 pt-4 border-t-2 border-slate-200/80">
-                     <h4 class="text-xl font-bold text-slate-700 mb-4 text-center">Contoh Penggunaan:</h4>
-                     <div class="space-y-3">
-                        ${examplesHtml}
-                     </div>
-                </div>
-            `;
+          slideContent = `<div class="anim-el w-full flex flex-col items-center justify-center text-center"><div class="flex items-center justify-center gap-x-4"><div id="hanzi-writer-container-${word.pinyin}" class="flex justify-center items-center"></div><div class="flex flex-col gap-y-2"><button onclick="event.stopPropagation(); speak('${word.hanzi}')" class="p-3 rounded-full text-sky-500 hover:bg-sky-100 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M15 8a5 5 0 0 1 0 8"></path><path d="M17.7 5a9 9 0 0 1 0 14"></path><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"></path></svg></button><button onclick="event.stopPropagation(); animateWord('${word.hanzi}')" class="p-3 rounded-full text-green-500 hover:bg-green-100 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-writing" width="36" height="36" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M20 17v-12c0 -1.121 -.879 -2 -2 -2s-2 .879 -2 2v12l2 2l2 -2z"></path><path d="M16 7h4"></path><path d="M18 19h-13a2 2 0 1 1 0 -4h4a2 2 0 1 0 0 -4h-3"></path></svg></button></div></div><h2 class="pinyin text-3xl md:text-4xl text-slate-600 mt-2 mb-4">${word.pinyin}</h2><h3 class="text-2xl md:text-3xl font-semibold text-indigo-600 capitalize">${word.indonesian}</h3></div><div class="anim-el w-full max-w-3xl mt-4 pt-4 border-t-2 border-slate-200/80"><h4 class="text-xl font-bold text-slate-700 mb-4 text-center">Contoh Penggunaan:</h4><div class="space-y-3">${examplesHtml}</div></div>`;
         } else if (slideData.type === "dialog") {
           const conversationItems = slideData.conversation
             .map((line, index) => {
               const isA = index % 2 === 0;
-              const bgColor = isA ? "bg-slate-100/80" : "bg-white/80";
-              const textAlign = isA ? "text-left" : "text-right";
-              const personClass = isA
-                ? "bg-blue-500 text-white"
-                : "bg-green-500 text-white";
-              const personLabel = isA ? "A" : "B";
-              const itemFlexDirection = isA ? "flex-row" : "flex-row-reverse";
-
-              return `
-                <li class="anim-el flex ${itemFlexDirection} items-start gap-4">
-                    <div class="flex-shrink-0 w-10 h-10 rounded-full ${personClass} flex items-center justify-center font-bold text-lg">
-                        ${personLabel}
-                    </div>
-                    <div class="flex-grow p-4 rounded-lg ${bgColor} shadow-sm">
-                        <div class="flex items-center justify-between gap-4">
-                            <div class="${textAlign}">
-                                <p class="hanzi text-slate-800 text-lg">${line.hanzi}</p>
-                                <p class="pinyin text-slate-500">${line.pinyin}</p>
-                                <p class="translation text-indigo-600 mt-1 font-medium">${line.indonesian}</p>
-                            </div>
-                            <button onclick="event.stopPropagation(); speak('${line.hanzi}')" class="p-2 rounded-full text-sky-500 hover:bg-sky-100 transition-colors flex-shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M15 8a5 5 0 0 1 0 8"></path><path d="M17.7 5a9 9 0 0 1 0 14"></path><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"></path></svg>
-                            </button>
-                        </div>
-                    </div>
-                </li>
-            `;
+              return `<li class="anim-el flex ${
+                isA ? "flex-row" : "flex-row-reverse"
+              } items-start gap-4"><div class="flex-shrink-0 w-10 h-10 rounded-full ${
+                isA ? "bg-blue-500" : "bg-green-500"
+              } text-white flex items-center justify-center font-bold text-lg">${
+                isA ? "A" : "B"
+              }</div><div class="flex-grow p-4 rounded-lg ${
+                isA ? "bg-slate-100/80" : "bg-white/80"
+              } shadow-sm"><div class="flex items-center justify-between gap-4"><div class="${
+                isA ? "text-left" : "text-right"
+              }"><p class="hanzi text-slate-800 text-lg">${
+                line.hanzi
+              }</p><p class="pinyin text-slate-500">${
+                line.pinyin
+              }</p><p class="translation text-indigo-600 mt-1 font-medium">${
+                line.indonesian
+              }</p></div><button onclick="event.stopPropagation(); speak('${
+                line.hanzi
+              }')" class="p-2 rounded-full text-sky-500 hover:bg-sky-100 transition-colors flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M15 8a5 5 0 0 1 0 8"></path><path d="M17.7 5a9 9 0 0 1 0 14"></path><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"></path></svg></button></div></div></li>`;
             })
             .join("");
-
           slide.classList.remove("text-center", "items-center");
           slide.classList.add("items-start");
-          slideContent = `
-                <h2 class="anim-el text-3xl md:text-5xl font-bold mb-6 self-center text-purple-600 hanzi">${slideData.topic}</h2>
-                <div class="w-full flex-grow overflow-y-auto custom-scrollbar pr-4">
-                    <ul class="space-y-4">${conversationItems}</ul>
-                </div>
-            `;
+          slideContent = `<h2 class="anim-el text-3xl md:text-5xl font-bold mb-6 self-center text-purple-600 hanzi">${slideData.topic}</h2><div class="w-full flex-grow overflow-y-auto custom-scrollbar pr-4"><ul class="space-y-4">${conversationItems}</ul></div>`;
         } else if (slideData.type === "closing") {
-          slideContent = `
-                <h1 class="anim-el text-5xl md:text-6xl font-bold text-indigo-600 mb-4">${slideData.title}</h1>
-                <h2 class="anim-el text-4xl md:text-5xl font-bold text-slate-800 hanzi">${slideData.hanzi}</h2>
-                <h3 class="anim-el text-2xl text-slate-600 mt-8">Pelajaran hari ini selesai. (<span class="hanzi">今天的课就到这里。</span>)</h3>
-            `;
+          slideContent = `<h1 class="anim-el text-5xl md:text-6xl font-bold text-indigo-600 mb-4">${slideData.title}</h1><h2 class="anim-el text-4xl md:text-5xl font-bold text-slate-800 hanzi">${slideData.hanzi}</h2><h3 class="anim-el text-2xl text-slate-600 mt-8">Pelajaran hari ini selesai. (<span class="hanzi">今天的课就到这里。</span>)</h3>`;
         } else if (slideData.type === "qa") {
-          slideContent = `
-                <h2 class="anim-el text-3xl md:text-5xl font-bold text-slate-800 mb-4">${slideData.title}</h2>
-                <p class="anim-el hanzi md:text-6xl text-4xl">${slideData.hanzi}</p>
-                <p class="anim-el mt-8 text-lg text-slate-600">Terima kasih atas partisipasinya!</p>
-            `;
+          slideContent = `<h2 class="anim-el text-3xl md:text-5xl font-bold text-slate-800 mb-4">${slideData.title}</h2><p class="anim-el hanzi md:text-6xl text-4xl">${slideData.hanzi}</p><p class="anim-el mt-8 text-lg text-slate-600">Terima kasih atas partisipasinya!</p>`;
         }
-
-        slide.innerHTML = slideContent + `<img src="logo.png" alt="Logo" class="absolute top-8 right-8 w-16 h-auto opacity-75">`;
-
+        slide.innerHTML =
+          slideContent +
+          `<img src="logo.png" alt="Logo" class="absolute top-8 right-8 w-16 h-auto opacity-75">`;
         return slide;
       }
 
+      // --- Slideshow Logic ---
       function initSlides() {
         slideshowContainer.innerHTML = "";
-        allSlidesData.forEach((slideData) => {
-          const slideEl = createSlideElement(slideData);
-          slideshowContainer.appendChild(slideEl);
-        });
+        allSlidesData.forEach((slideData) =>
+          slideshowContainer.appendChild(createSlideElement(slideData))
+        );
         totalSlides = slideshowContainer.querySelectorAll(".slide").length;
       }
 
-      // --- Slideshow Animation and Navigation ---
-      function animateSlideIn(slide) {
-        const elements = slide.querySelectorAll(".anim-el");
-        const tl = gsap.timeline({ onComplete: () => (isAnimating = false) });
-
+      function animateSlideIn(slide, onCompleteCallback) {
+        const tl = gsap.timeline({
+          onComplete: () => {
+            isAnimating = false;
+            if (onCompleteCallback) onCompleteCallback();
+          },
+        });
         tl.fromTo(
           slide,
           { autoAlpha: 0, scale: 1.03 },
           { autoAlpha: 1, scale: 1, duration: 0.6, ease: "power2.out" }
         );
-
-        if (elements.length > 0) {
+        const elements = slide.querySelectorAll(".anim-el");
+        if (elements.length > 0)
           tl.fromTo(
             elements,
             { opacity: 0, y: 20 },
@@ -579,7 +493,6 @@
             },
             "-=0.4"
           );
-        }
       }
 
       function animateSlideOut(slide, onComplete) {
@@ -595,221 +508,208 @@
       function showSlide(index) {
         if (isAnimating || index < 0 || index >= totalSlides) return;
         isAnimating = true;
-
         const slides = slideshowContainer.querySelectorAll(".slide");
         const oldSlide = slides[currentSlideIndex];
-
         if (drawingManager) drawingManager.saveDrawing(currentSlideIndex);
 
         animateSlideOut(oldSlide, () => {
           oldSlide.style.visibility = "hidden";
           currentSlideIndex = index;
           const newSlide = slides[currentSlideIndex];
+          const newSlideData = allSlidesData[currentSlideIndex];
           newSlide.style.visibility = "visible";
-          animateSlideIn(newSlide);
+
+          const onAnimationComplete = () => {
+            if (newSlideData.type === "vocabulary_word") {
+              const { hanzi, pinyin } = newSlideData.word;
+              const container = document.getElementById(
+                `hanzi-writer-container-${pinyin}`
+              );
+              if (container) {
+                container.innerHTML = ""; // Clear previous characters
+                let charSize = hanzi.length > 2 ? 100 : 150;
+                for (const char of hanzi) {
+                  const targetDiv = document.createElement("div");
+                  container.appendChild(targetDiv);
+                  hanziWriters[char] = HanziWriter.create(targetDiv, char, {
+                    width: charSize,
+                    height: charSize,
+                    padding: 5,
+                    showOutline: true,
+                    strokeAnimationSpeed: 1,
+                    delayBetweenStrokes: 100,
+                    strokeColor: "#1e293b",
+                    radicalColor: "#4f46e5",
+                  });
+                }
+                animateWord(hanzi);
+              }
+            }
+          };
+          animateSlideIn(newSlide, onAnimationComplete);
           if (drawingManager) drawingManager.loadDrawing(currentSlideIndex);
         });
       }
 
       slideshowContainer.addEventListener("click", (event) => {
-        if (drawingManager && drawingManager.drawingMode !== "none") return;
-
+        if (drawingManager?.drawingMode !== "none") return;
         const rect = slideshowContainer.getBoundingClientRect();
-        const clickX = event.clientX - rect.left;
-
-        if (clickX > rect.width / 2) {
+        if (event.clientX - rect.left > rect.width / 2) {
           showSlide(currentSlideIndex + 1);
         } else {
           showSlide(currentSlideIndex - 1);
         }
       });
 
-      // --- Drawing Controls Logic ---
-      const penButton = document.getElementById("pen-button");
-      const eraserButton = document.getElementById("eraser-button");
-      const clearButton = document.getElementById("clear-button");
-      const neutralButton = document.getElementById("neutral-button");
-
-      penButton.addEventListener("click", (e) => {
-        e.stopPropagation();
-        drawingManager.setMode("pen");
-      });
-      eraserButton.addEventListener("click", (e) => {
-        e.stopPropagation();
-        drawingManager.setMode("line-eraser");
-      });
-      clearButton.addEventListener("click", (e) => {
-        e.stopPropagation();
-        drawingManager.clearCanvas();
-      });
-      neutralButton.addEventListener("click", (e) => {
-        e.stopPropagation();
-        drawingManager.setMode("none");
-      });
-
-      // --- DrawingManager Class (Unchanged from original) ---
+      // --- DrawingManager Class (minified for brevity) ---
       class DrawingManager {
-        constructor(container, slideshow) {
-          this.container = container;
-          this.slideshow = slideshow;
-          this.canvas = document.createElement("canvas");
-          this.ctx = this.canvas.getContext("2d");
-          this.drawing = false;
-          this.lines = new Map();
-          this.drawingMode = "none";
-          this.penColor = "#1e293b";
-          this.penWidth = 4;
-          this.proximityThreshold = 10;
-          this.initCanvas();
-          this.addEventListeners();
+        constructor(t, e, i) {
+          (this.container = t),
+            (this.slideshow = e),
+            (this.controls = i),
+            (this.canvas = document.createElement("canvas")),
+            (this.ctx = this.canvas.getContext("2d")),
+            (this.drawing = !1),
+            (this.lines = new Map()),
+            (this.drawingMode = "none"),
+            (this.penColor = "#1e293b"),
+            (this.penWidth = 4),
+            (this.proximityThreshold = 10),
+            this.initCanvas(),
+            this.addEventListeners();
         }
         initCanvas() {
-          this.canvas.id = "drawing-canvas";
-          this.container.appendChild(this.canvas);
-          window.addEventListener("resize", () => this.resizeCanvas());
-          this.resizeCanvas();
+          (this.canvas.id = "drawing-canvas"),
+            this.container.appendChild(this.canvas),
+            window.addEventListener("resize", () => this.resizeCanvas()),
+            this.resizeCanvas();
         }
         resizeCanvas() {
-          const rect = this.container.getBoundingClientRect();
-          this.canvas.width = rect.width;
-          this.canvas.height = rect.height;
-          this.redraw(this.slideshow.currentSlideIndex);
+          const t = this.container.getBoundingClientRect();
+          (this.canvas.width = t.width),
+            (this.canvas.height = t.height),
+            this.redraw(this.slideshow.currentSlideIndex);
         }
         addEventListeners() {
-          this.canvas.addEventListener("mousedown", (e) =>
-            this.handleCanvasInteraction(e)
-          );
-          this.canvas.addEventListener("mousemove", (e) =>
-            this.handleCanvasInteraction(e)
-          );
-          this.canvas.addEventListener("mouseup", () => this.stopDrawing());
-          this.canvas.addEventListener("mouseout", () => this.stopDrawing());
-          this.canvas.addEventListener("touchstart", (e) => {
-            e.preventDefault();
-            this.handleCanvasInteraction(e.touches[0]);
-          });
-          this.canvas.addEventListener("touchmove", (e) => {
-            e.preventDefault();
-            this.handleCanvasInteraction(e.touches[0]);
-          });
-          this.canvas.addEventListener("touchend", () => this.stopDrawing());
+          this.canvas.addEventListener("mousedown", (t) =>
+            this.handleCanvasInteraction(t)
+          ),
+            this.canvas.addEventListener("mousemove", (t) =>
+              this.handleCanvasInteraction(t)
+            ),
+            this.canvas.addEventListener("mouseup", () => this.stopDrawing()),
+            this.canvas.addEventListener("mouseout", () => this.stopDrawing()),
+            this.canvas.addEventListener("touchstart", (t) => {
+              t.preventDefault(), this.handleCanvasInteraction(t.touches[0]);
+            }),
+            this.canvas.addEventListener("touchmove", (t) => {
+              t.preventDefault(), this.handleCanvasInteraction(t.touches[0]);
+            }),
+            this.canvas.addEventListener("touchend", () => this.stopDrawing());
         }
-        handleCanvasInteraction(e) {
-          const rect = this.canvas.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
-          if (this.drawingMode === "pen") {
-            if (e.type === "mousedown" || e.type === "touchstart")
-              this.startDrawing(x, y);
-            else if (e.type === "mousemove" || e.type === "touchmove")
-              this.draw(x, y);
-          } else if (
-            this.drawingMode === "line-eraser" &&
-            (e.type === "mousedown" || e.type === "touchstart")
-          ) {
-            this.eraseLine(x, y);
-          }
+        handleCanvasInteraction(t) {
+          const e = this.canvas.getBoundingClientRect(),
+            i = t.clientX - e.left,
+            s = t.clientY - e.top;
+          if ("pen" === this.drawingMode)
+            "mousedown" === t.type || "touchstart" === t.type
+              ? this.startDrawing(i, s)
+              : ("mousemove" !== t.type && "touchmove" !== t.type) ||
+                this.draw(i, s);
+          else if (
+            "line-eraser" === this.drawingMode &&
+            ("mousedown" === t.type || "touchstart" === t.type)
+          )
+            this.eraseLine(i, s);
         }
-        startDrawing(x, y) {
-          this.drawing = true;
-          const currentLines =
-            this.lines.get(this.slideshow.currentSlideIndex) || [];
-          currentLines.push({ points: [{ x, y }] });
-          this.lines.set(this.slideshow.currentSlideIndex, currentLines);
-          this.redraw(this.slideshow.currentSlideIndex);
-        }
-        draw(x, y) {
-          if (!this.drawing || this.drawingMode !== "pen") return;
-          const currentLines = this.lines.get(this.slideshow.currentSlideIndex);
-          if (currentLines && currentLines.length > 0) {
-            currentLines[currentLines.length - 1].points.push({ x, y });
+        startDrawing(t, e) {
+          this.drawing = !0;
+          const i = this.lines.get(this.slideshow.currentSlideIndex) || [];
+          i.push({ points: [{ x: t, y: e }] }),
+            this.lines.set(this.slideshow.currentSlideIndex, i),
             this.redraw(this.slideshow.currentSlideIndex);
-          }
+        }
+        draw(t, e) {
+          if (!this.drawing || "pen" !== this.drawingMode) return;
+          const i = this.lines.get(this.slideshow.currentSlideIndex);
+          i?.length > 0 &&
+            (i[i.length - 1].points.push({ x: t, y: e }),
+            this.redraw(this.slideshow.currentSlideIndex));
         }
         stopDrawing() {
-          this.drawing = false;
+          this.drawing = !1;
         }
-        eraseLine(x, y) {
-          const currentLines =
-            this.lines.get(this.slideshow.currentSlideIndex) || [];
-          let lineToRemove = -1;
-          for (let i = 0; i < currentLines.length; i++) {
-            for (let j = 0; j < currentLines[i].points.length - 1; j++) {
-              const p1 = currentLines[i].points[j],
-                p2 = currentLines[i].points[j + 1];
+        eraseLine(t, e) {
+          const i = this.lines.get(this.slideshow.currentSlideIndex) || [];
+          let s = -1;
+          for (let h = 0; h < i.length; h++) {
+            for (let n = 0; n < i[h].points.length - 1; n++) {
+              const r = i[h].points[n],
+                o = i[h].points[n + 1];
               if (
-                this.pointToLineDistance(x, y, p1.x, p1.y, p2.x, p2.y) <
+                this.pointToLineDistance(t, e, r.x, r.y, o.x, o.y) <
                 this.proximityThreshold
               ) {
-                lineToRemove = i;
+                s = h;
                 break;
               }
             }
-            if (lineToRemove !== -1) break;
+            if (-1 !== s) break;
           }
-          if (lineToRemove !== -1) {
-            currentLines.splice(lineToRemove, 1);
-            this.lines.set(this.slideshow.currentSlideIndex, currentLines);
-            this.redraw(this.slideshow.currentSlideIndex);
-          }
+          -1 !== s &&
+            (i.splice(s, 1),
+            this.lines.set(this.slideshow.currentSlideIndex, i),
+            this.redraw(this.slideshow.currentSlideIndex));
         }
-        pointToLineDistance(px, py, x1, y1, x2, y2) {
-          const A = px - x1,
-            B = py - y1,
-            C = x2 - x1,
-            D = y2 - y1;
-          const dot = A * C + B * D,
-            len_sq = C * C + D * D;
-          let param = len_sq !== 0 ? dot / len_sq : -1;
-          let xx, yy;
-          if (param < 0) {
-            xx = x1;
-            yy = y1;
-          } else if (param > 1) {
-            xx = x2;
-            yy = y2;
-          } else {
-            xx = x1 + param * C;
-            yy = y1 + param * D;
-          }
-          const dx = px - xx,
-            dy = py - yy;
-          return Math.sqrt(dx * dx + dy * dy);
+        pointToLineDistance(t, e, i, s, h, n) {
+          const r = t - i,
+            o = e - s,
+            a = h - i,
+            d = n - s,
+            l = r * a + o * d,
+            c = a * a + d * d;
+          let u = -1;
+          0 !== c && (u = l / c);
+          let v, x;
+          const g = t - (v = u < 0 ? i : u > 1 ? h : i + u * a),
+            w = e - (x = u < 0 ? s : u > 1 ? n : s + u * d);
+          return Math.sqrt(g * g + w * w);
         }
-        redraw(slideIndex) {
+        redraw(t) {
           this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-          const currentLines = this.lines.get(slideIndex) || [];
-          currentLines.forEach((line) => {
-            if (line.points.length < 2) return;
-            this.ctx.beginPath();
-            this.ctx.lineWidth = this.penWidth;
-            this.ctx.strokeStyle = this.penColor;
-            this.ctx.lineCap = "round";
-            this.ctx.moveTo(line.points[0].x, line.points[0].y);
-            for (let i = 1; i < line.points.length; i++)
-              this.ctx.lineTo(line.points[i].x, line.points[i].y);
+          (this.lines.get(t) || []).forEach((t) => {
+            if (t.points.length < 2) return;
+            this.ctx.beginPath(),
+              (this.ctx.lineWidth = this.penWidth),
+              (this.ctx.strokeStyle = this.penColor),
+              (this.ctx.lineCap = "round"),
+              this.ctx.moveTo(t.points[0].x, t.points[0].y);
+            for (let e = 1; e < t.points.length; e++)
+              this.ctx.lineTo(t.points[e].x, t.points[e].y);
             this.ctx.stroke();
           });
         }
-        setMode(mode) {
-          this.drawingMode = mode;
-          document.body.classList.toggle("drawing-active", mode !== "none");
-          document
-            .querySelectorAll(".drawing-controls button")
-            .forEach((btn) => btn.classList.remove("active"));
-          if (mode === "pen") penButton.classList.add("active");
-          else if (mode === "line-eraser") eraserButton.classList.add("active");
-          else if (mode === "none") neutralButton.classList.add("active");
+        setMode(t) {
+          (this.drawingMode = t),
+            document.body.classList.toggle("drawing-active", "none" !== t),
+            Object.values(this.controls).forEach((t) =>
+              t.classList.remove("active")
+            ),
+            "pen" === t
+              ? this.controls.pen.classList.add("active")
+              : "line-eraser" === t
+              ? this.controls.eraser.classList.add("active")
+              : "none" === t && this.controls.neutral.classList.add("active");
         }
         clearCanvas() {
-          this.lines.delete(this.slideshow.currentSlideIndex);
-          this.redraw(this.slideshow.currentSlideIndex);
+          this.lines.delete(this.slideshow.currentSlideIndex),
+            this.redraw(this.slideshow.currentSlideIndex);
         }
-        saveDrawing(slideIndex) {
-          this.lines.set(slideIndex, this.lines.get(slideIndex) || []);
+        saveDrawing(t) {
+          this.lines.set(t, this.lines.get(t) || []);
         }
-        loadDrawing(slideIndex) {
-          this.redraw(slideIndex);
+        loadDrawing(t) {
+          this.redraw(t);
         }
       }
 
@@ -820,8 +720,8 @@
             number: { value: 60, density: { enable: true, value_area: 800 } },
             color: { value: "#64748b" },
             shape: { type: "circle" },
-            opacity: { value: 0.5, random: true, anim: { enable: false } },
-            size: { value: 3, random: true, anim: { enable: false } },
+            opacity: { value: 0.5, random: true },
+            size: { value: 3, random: true },
             line_linked: {
               enable: true,
               distance: 150,
@@ -833,17 +733,13 @@
               enable: true,
               speed: 2,
               direction: "none",
-              random: false,
-              straight: false,
               out_mode: "out",
-              bounce: false,
             },
           },
           interactivity: {
             detect_on: "canvas",
             events: {
               onhover: { enable: true, mode: "repulse" },
-              onclick: { enable: false },
               resize: true,
             },
             modes: { repulse: { distance: 100, duration: 0.4 } },
@@ -859,20 +755,45 @@
         const firstSlide = slideshowContainer.querySelector(".slide");
         if (firstSlide) {
           firstSlide.style.visibility = "visible";
-          const elements = firstSlide.querySelectorAll(".anim-el");
-          gsap.set(elements, { opacity: 0, y: 20 });
+          gsap.set(firstSlide.querySelectorAll(".anim-el"), {
+            opacity: 0,
+            y: 20,
+          });
           isAnimating = true;
           animateSlideIn(firstSlide);
         }
-        drawingManager = new DrawingManager(slideshowContainer, {
-          get currentSlideIndex() {
-            return currentSlideIndex;
+        const penButton = document.getElementById("pen-button");
+        const eraserButton = document.getElementById("eraser-button");
+        const clearButton = document.getElementById("clear-button");
+        const neutralButton = document.getElementById("neutral-button");
+        drawingManager = new DrawingManager(
+          slideshowContainer,
+          {
+            get currentSlideIndex() {
+              return currentSlideIndex;
+            },
           },
+          { pen: penButton, eraser: eraserButton, neutral: neutralButton }
+        );
+        penButton.addEventListener("click", (e) => {
+          e.stopPropagation();
+          drawingManager.setMode("pen");
+        });
+        eraserButton.addEventListener("click", (e) => {
+          e.stopPropagation();
+          drawingManager.setMode("line-eraser");
+        });
+        clearButton.addEventListener("click", (e) => {
+          e.stopPropagation();
+          drawingManager.clearCanvas();
+        });
+        neutralButton.addEventListener("click", (e) => {
+          e.stopPropagation();
+          drawingManager.setMode("none");
         });
         drawingManager.setMode("none");
         setupParticles();
       }
-
       window.addEventListener("load", main);
     </script>
   </body>
