@@ -6,11 +6,8 @@
     <title>HSK Vocabulary Slideshow</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
-
     <link
       href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
@@ -20,7 +17,6 @@
       body {
         font-family: "Inter", sans-serif;
       }
-      /* Hide all slides initially */
       .slide {
         visibility: hidden;
         position: absolute;
@@ -31,14 +27,6 @@
         font-family: "Noto Sans SC", sans-serif;
         font-weight: 700;
       }
-      .pinyin {
-        font-size: 1rem;
-      }
-      .translation {
-        font-style: italic;
-        font-size: 1rem;
-      }
-      /* Class for elements to be animated */
       .anim-el {
         opacity: 0;
         transform: translateY(20px);
@@ -50,41 +38,83 @@
         top: 0;
         left: 0;
         z-index: -1;
-        background-color: #e2e8f0; /* bg-slate-200 */
+        background-color: #e2e8f0;
       }
-      /* Custom Scrollbar for Webkit Browsers */
-      .custom-scrollbar::-webkit-scrollbar {
-        width: 6px;
-      }
-      .custom-scrollbar::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: rgba(0, 0, 0, 0.2);
-        border-radius: 10px;
-      }
-      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: rgba(0, 0, 0, 0.3);
-      }
-
-      /* Canvas Overlay */
-      #drawing-canvas {
+      #drawing-canvas,
+      #text-overlay {
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
+        pointer-events: none;
+      }
+      #drawing-canvas {
         z-index: 20;
-        pointer-events: none; /* Initially ignore pointer events */
       }
-
-      .drawing-active #drawing-canvas {
-        pointer-events: auto; /* Enable drawing when in pen/eraser mode */
+      #text-overlay {
+        z-index: 25;
       }
-
+      body.drawing-active #drawing-canvas,
+      body.text-active #text-overlay {
+        pointer-events: auto;
+      }
       .drawing-controls button.active {
         background-color: #f97316 !important;
         color: #ffffff;
+      }
+      .text-input-wrapper {
+        position: absolute;
+        pointer-events: auto;
+        z-index: 30;
+      }
+      .text-input-wrapper input {
+        background-color: rgba(255, 255, 255, 0.95);
+        border: 2px solid #6366f1;
+        border-radius: 0.375rem;
+        padding: 0.25rem 0.5rem;
+        font-size: 1.125rem;
+        color: #1e293b;
+        min-width: 150px;
+      }
+      .text-input-wrapper input:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.5);
+      }
+      .draggable-text-wrapper {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px;
+        border-radius: 6px;
+        transition: background-color 0.2s;
+        pointer-events: auto;
+      }
+      .draggable-text-wrapper:hover {
+        background-color: rgba(99, 102, 241, 0.1);
+      }
+      .draggable-text-wrapper p {
+        text-shadow: 0px 0px 5px rgba(255, 255, 255, 0.8);
+        cursor: text;
+      }
+      .move-handle {
+        cursor: move;
+        opacity: 0.2;
+        transition: opacity 0.2s;
+        color: #4f46e5;
+      }
+      .draggable-text-wrapper:hover .move-handle {
+        opacity: 1;
+      }
+      .draggable-text-wrapper.dragging {
+        opacity: 0.7;
+        background-color: rgba(99, 102, 241, 0.2);
+        cursor: grabbing;
+        z-index: 999;
+      }
+      .draggable-text-wrapper.dragging .move-handle {
+        cursor: grabbing;
       }
     </style>
   </head>
@@ -107,11 +137,11 @@
       </div>
 
       <div
-        class="drawing-controls absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-4 p-2 bg-white/80 backdrop-blur-md rounded-full shadow-lg z-50"
+        class="drawing-controls absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-2 md:space-x-4 p-2 bg-white/80 backdrop-blur-md rounded-full shadow-lg z-50"
       >
         <button
           id="neutral-button"
-          title="Kembali ke Navigasi"
+          title="Navigasi / Pindah Teks"
           class="control-btn p-3 rounded-full text-gray-500 hover:bg-gray-200 transition-colors"
         >
           <svg
@@ -135,7 +165,7 @@
         </button>
         <button
           id="pen-button"
-          title="Pena"
+          title="Menggambar"
           class="control-btn p-3 rounded-full text-blue-500 hover:bg-blue-100 transition-colors"
         >
           <svg
@@ -153,6 +183,31 @@
             <path stroke="none" d="M0 0h24v24H0z" fill="none" />
             <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
             <path d="M13.5 6.5l4 4" />
+          </svg>
+        </button>
+        <button
+          id="text-button"
+          title="Tambah Teks"
+          class="control-btn p-3 rounded-full text-purple-500 hover:bg-purple-100 transition-colors"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="icon icon-tabler icon-tabler-typography"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+            stroke="currentColor"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M4 20l3 0" />
+            <path d="M14 20l7 0" />
+            <path d="M6.9 15l6.9 0" />
+            <path d="M10.2 6.3l5.8 13.7" />
+            <path d="M6 20l6 -16l6 16" />
           </svg>
         </button>
         <button
@@ -181,7 +236,7 @@
         </button>
         <button
           id="clear-button"
-          title="Bersihkan"
+          title="Bersihkan Slide Ini"
           class="control-btn p-3 rounded-full text-red-500 hover:bg-red-100 transition-colors"
         >
           <svg
@@ -219,8 +274,8 @@
       let totalSlides = 0;
       let allSlidesData = [];
       let isAnimating = false;
-      let drawingManager;
-      let hanziWriters = {}; // Stores one writer instance PER CHARACTER
+      let annotationManager;
+      let hanziWriters = {};
 
       // --- Main Initializer ---
       async function main() {
@@ -251,7 +306,7 @@
         slideshowContainer.innerHTML = `<div class="slide p-8 flex justify-center items-center text-center bg-white/60 backdrop-blur-xl rounded-3xl" style="visibility: visible;"><h1 class="text-3xl font-bold text-red-600">Error</h1><p class="mt-4 text-slate-700">${message}</p></div>`;
       }
 
-      // --- Hanzi Data & Animation Logic (FIXED) ---
+      // --- Hanzi Data & Animation Logic ---
       function preloadHanziData(data) {
         const allChars = new Set();
         for (const levelKey in data) {
@@ -261,9 +316,6 @@
             });
           }
         }
-        console.log(
-          `Preloading data for ${allChars.size} unique characters...`
-        );
         const promises = Array.from(allChars).map((char) =>
           HanziWriter.loadCharacterData(char).catch((err) =>
             console.warn(`Gagal memuat data untuk karakter: ${char}`, err)
@@ -424,16 +476,18 @@
             .map((line, index) => {
               const isA = index % 2 === 0;
               return `<li class="anim-el flex ${
+                isA ? "justify-start" : "justify-end"
+              }"><div class="flex ${
                 isA ? "flex-row" : "flex-row-reverse"
-              } items-start gap-4"><div class="flex-shrink-0 w-10 h-10 rounded-full ${
+              } items-start gap-3 max-w-lg lg:max-w-xl"><div class="flex-shrink-0 w-10 h-10 rounded-full ${
                 isA ? "bg-blue-500" : "bg-green-500"
               } text-white flex items-center justify-center font-bold text-lg">${
                 isA ? "A" : "B"
               }</div><div class="flex-grow p-4 rounded-lg ${
-                isA ? "bg-slate-100/80" : "bg-white/80"
-              } shadow-sm"><div class="flex items-center justify-between gap-4"><div class="${
-                isA ? "text-left" : "text-right"
-              }"><p class="hanzi text-slate-800 text-lg">${
+                isA ? "bg-slate-100/80 text-left" : "bg-white/80 text-right"
+              } shadow-sm"><div class="flex items-center ${
+                isA ? "justify-between" : "justify-end"
+              } gap-4"><div><p class="hanzi text-slate-800 text-lg">${
                 line.hanzi
               }</p><p class="pinyin text-slate-500">${
                 line.pinyin
@@ -441,7 +495,7 @@
                 line.indonesian
               }</p></div><button onclick="event.stopPropagation(); speak('${
                 line.hanzi
-              }')" class="p-2 rounded-full text-sky-500 hover:bg-sky-100 transition-colors flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M15 8a5 5 0 0 1 0 8"></path><path d="M17.7 5a9 9 0 0 1 0 14"></path><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"></path></svg></button></div></div></li>`;
+              }')" class="p-2 rounded-full text-sky-500 hover:bg-sky-100 transition-colors flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M15 8a5 5 0 0 1 0 8"></path><path d="M17.7 5a9 9 0 0 1 0 14"></path><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"></path></svg></button></div></div></div></li>`;
             })
             .join("");
           slide.classList.remove("text-center", "items-center");
@@ -510,7 +564,8 @@
         isAnimating = true;
         const slides = slideshowContainer.querySelectorAll(".slide");
         const oldSlide = slides[currentSlideIndex];
-        if (drawingManager) drawingManager.saveDrawing(currentSlideIndex);
+        if (annotationManager)
+          annotationManager.saveAnnotations(currentSlideIndex);
 
         animateSlideOut(oldSlide, () => {
           oldSlide.style.visibility = "hidden";
@@ -526,7 +581,7 @@
                 `hanzi-writer-container-${pinyin}`
               );
               if (container) {
-                container.innerHTML = ""; // Clear previous characters
+                container.innerHTML = ""; // Clear previous
                 let charSize = hanzi.length > 2 ? 100 : 150;
                 for (const char of hanzi) {
                   const targetDiv = document.createElement("div");
@@ -547,12 +602,13 @@
             }
           };
           animateSlideIn(newSlide, onAnimationComplete);
-          if (drawingManager) drawingManager.loadDrawing(currentSlideIndex);
+          if (annotationManager)
+            annotationManager.loadAnnotations(currentSlideIndex);
         });
       }
 
       slideshowContainer.addEventListener("click", (event) => {
-        if (drawingManager?.drawingMode !== "none") return;
+        if (annotationManager?.mode !== "none") return;
         const rect = slideshowContainer.getBoundingClientRect();
         if (event.clientX - rect.left > rect.width / 2) {
           showSlide(currentSlideIndex + 1);
@@ -561,105 +617,356 @@
         }
       });
 
-      // --- DrawingManager Class (minified for brevity) ---
-      class DrawingManager {
-        constructor(t, e, i) {
-          (this.container = t),
-            (this.slideshow = e),
-            (this.controls = i),
-            (this.canvas = document.createElement("canvas")),
-            (this.ctx = this.canvas.getContext("2d")),
-            (this.drawing = !1),
-            (this.lines = new Map()),
-            (this.drawingMode = "none"),
-            (this.penColor = "#1e293b"),
-            (this.penWidth = 4),
-            (this.proximityThreshold = 10),
-            this.initCanvas(),
-            this.addEventListeners();
+      // --- AnnotationManager Class (Handles Drawing and Text) ---
+      class AnnotationManager {
+        constructor(container, slideshow, controls) {
+          this.container = container;
+          this.slideshow = slideshow;
+          this.controls = controls;
+          this.canvas = document.createElement("canvas");
+          this.ctx = this.canvas.getContext("2d");
+          this.textOverlay = document.createElement("div");
+          this.lines = new Map();
+          this.texts = new Map();
+          this.drawing = false;
+          this.mode = "none";
+          this.penColor = "#1e293b";
+          this.penWidth = 4;
+          this.proximityThreshold = 10;
+
+          this.draggedText = null;
+          this.offsetX = 0;
+          this.offsetY = 0;
+
+          this.drag = this.drag.bind(this);
+          this.endDrag = this.endDrag.bind(this);
+
+          this.initOverlays();
+          this.addEventListeners();
         }
-        initCanvas() {
-          (this.canvas.id = "drawing-canvas"),
-            this.container.appendChild(this.canvas),
-            window.addEventListener("resize", () => this.resizeCanvas()),
-            this.resizeCanvas();
+
+        initOverlays() {
+          this.canvas.id = "drawing-canvas";
+          this.textOverlay.id = "text-overlay";
+          this.container.appendChild(this.canvas);
+          this.container.appendChild(this.textOverlay);
+          window.addEventListener("resize", () => this.resizeOverlays());
+          this.resizeOverlays();
         }
-        resizeCanvas() {
-          const t = this.container.getBoundingClientRect();
-          (this.canvas.width = t.width),
-            (this.canvas.height = t.height),
-            this.redraw(this.slideshow.currentSlideIndex);
+
+        resizeOverlays() {
+          const rect = this.container.getBoundingClientRect();
+          this.canvas.width = rect.width;
+          this.canvas.height = rect.height;
+          this.loadAnnotations(this.slideshow.currentSlideIndex);
         }
+
         addEventListeners() {
-          this.canvas.addEventListener("mousedown", (t) =>
-            this.handleCanvasInteraction(t)
-          ),
-            this.canvas.addEventListener("mousemove", (t) =>
-              this.handleCanvasInteraction(t)
-            ),
-            this.canvas.addEventListener("mouseup", () => this.stopDrawing()),
-            this.canvas.addEventListener("mouseout", () => this.stopDrawing()),
-            this.canvas.addEventListener("touchstart", (t) => {
-              t.preventDefault(), this.handleCanvasInteraction(t.touches[0]);
-            }),
-            this.canvas.addEventListener("touchmove", (t) => {
-              t.preventDefault(), this.handleCanvasInteraction(t.touches[0]);
-            }),
-            this.canvas.addEventListener("touchend", () => this.stopDrawing());
+          this.container.addEventListener("mousedown", (e) =>
+            this.handleInteractionStart(e)
+          );
+          this.container.addEventListener(
+            "touchstart",
+            (e) => this.handleInteractionStart(e.touches[0]),
+            { passive: false }
+          );
+          this.container.addEventListener("dblclick", (e) =>
+            this.handleDoubleClick(e)
+          );
         }
-        handleCanvasInteraction(t) {
-          const e = this.canvas.getBoundingClientRect(),
-            i = t.clientX - e.left,
-            s = t.clientY - e.top;
-          if ("pen" === this.drawingMode)
-            "mousedown" === t.type || "touchstart" === t.type
-              ? this.startDrawing(i, s)
-              : ("mousemove" !== t.type && "touchmove" !== t.type) ||
-                this.draw(i, s);
-          else if (
-            "line-eraser" === this.drawingMode &&
-            ("mousedown" === t.type || "touchstart" === t.type)
+
+        handleDoubleClick(e) {
+          const wrapper = e.target.closest(".draggable-text-wrapper");
+          if (wrapper && !document.querySelector(".text-input-wrapper input")) {
+            this.editText(wrapper);
+          }
+        }
+
+        handleInteractionStart(e) {
+          const activeInput = document.querySelector(
+            ".text-input-wrapper input"
+          );
+          if (activeInput) {
+            if (e.target !== activeInput) {
+              activeInput.blur();
+            }
+            return;
+          }
+
+          if (
+            !e ||
+            e.target.closest(".drawing-controls") ||
+            e.target.closest("button")
           )
-            this.eraseLine(i, s);
+            return;
+
+          if (e.target.closest(".move-handle")) {
+            this.startDrag(e);
+            return;
+          }
+
+          const rect = this.canvas.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+
+          switch (this.mode) {
+            case "pen":
+              this.startDrawing(x, y);
+              break;
+            case "line-eraser":
+              this.eraseLine(x, y);
+              this.eraseText(e.target);
+              break;
+            case "text":
+              if (e.target.closest(".draggable-text-wrapper")) {
+                return;
+              }
+              e.preventDefault();
+              e.stopPropagation();
+              this.addTextInput(x, y);
+              break;
+          }
         }
-        startDrawing(t, e) {
-          this.drawing = !0;
-          const i = this.lines.get(this.slideshow.currentSlideIndex) || [];
-          i.push({ points: [{ x: t, y: e }] }),
-            this.lines.set(this.slideshow.currentSlideIndex, i),
-            this.redraw(this.slideshow.currentSlideIndex);
+
+        startDrawing(x, y) {
+          this.drawing = true;
+          const currentLines =
+            this.lines.get(this.slideshow.currentSlideIndex) || [];
+          currentLines.push({ points: [{ x, y }] });
+          this.lines.set(this.slideshow.currentSlideIndex, currentLines);
+          this.redrawLines(this.slideshow.currentSlideIndex);
+
+          this.container.addEventListener("mousemove", this.drawMoveHandler);
+          this.container.addEventListener("touchmove", this.drawMoveHandler, {
+            passive: false,
+          });
+          document.addEventListener("mouseup", this.stopDrawingHandler);
+          document.addEventListener("touchend", this.stopDrawingHandler);
         }
-        draw(t, e) {
-          if (!this.drawing || "pen" !== this.drawingMode) return;
-          const i = this.lines.get(this.slideshow.currentSlideIndex);
-          i?.length > 0 &&
-            (i[i.length - 1].points.push({ x: t, y: e }),
-            this.redraw(this.slideshow.currentSlideIndex));
+
+        drawMoveHandler = (e) => {
+          e.preventDefault();
+          const event = e.touches ? e.touches[0] : e;
+          const rect = this.canvas.getBoundingClientRect();
+          const x = event.clientX - rect.left;
+          const y = event.clientY - rect.top;
+          this.draw(x, y);
+        };
+
+        draw(x, y) {
+          if (!this.drawing) return;
+          const currentLines = this.lines.get(this.slideshow.currentSlideIndex);
+          if (currentLines?.length > 0) {
+            currentLines[currentLines.length - 1].points.push({ x, y });
+            this.redrawLines(this.slideshow.currentSlideIndex);
+          }
         }
-        stopDrawing() {
-          this.drawing = !1;
+
+        stopDrawingHandler = () => {
+          this.drawing = false;
+          this.container.removeEventListener("mousemove", this.drawMoveHandler);
+          this.container.removeEventListener("touchmove", this.drawMoveHandler);
+          document.removeEventListener("mouseup", this.stopDrawingHandler);
+          document.removeEventListener("touchend", this.stopDrawingHandler);
+        };
+
+        addTextInput(x, y) {
+          if (document.querySelector(".text-input-wrapper")) return;
+          const wrapper = document.createElement("div");
+          wrapper.className = "text-input-wrapper";
+          wrapper.style.left = `${x}px`;
+          wrapper.style.top = `${y}px`;
+
+          const input = document.createElement("input");
+          input.type = "text";
+          input.onclick = (e) => e.stopPropagation();
+
+          wrapper.appendChild(input);
+          this.textOverlay.appendChild(wrapper);
+
+          requestAnimationFrame(() => input.focus());
+
+          const finalizeText = () => {
+            const textValue = input.value.trim();
+            if (textValue) {
+              const currentTexts =
+                this.texts.get(this.slideshow.currentSlideIndex) || [];
+              const id = Date.now() + Math.random();
+              currentTexts.push({ id, text: textValue, x, y });
+              this.texts.set(this.slideshow.currentSlideIndex, currentTexts);
+            }
+            wrapper.remove();
+            this.loadText(this.slideshow.currentSlideIndex);
+          };
+
+          input.addEventListener("blur", finalizeText, { once: true });
+          input.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") input.blur();
+          });
         }
-        eraseLine(t, e) {
-          const i = this.lines.get(this.slideshow.currentSlideIndex) || [];
-          let s = -1;
-          for (let h = 0; h < i.length; h++) {
-            for (let n = 0; n < i[h].points.length - 1; n++) {
-              const r = i[h].points[n],
-                o = i[h].points[n + 1];
+
+        editText(wrapper) {
+          const id = parseFloat(wrapper.dataset.textId);
+          const currentTexts =
+            this.texts.get(this.slideshow.currentSlideIndex) || [];
+          const textObj = currentTexts.find((t) => t.id === id);
+          if (!textObj) return;
+
+          const pElement = wrapper.querySelector("p");
+          const handleElement = wrapper.querySelector(".move-handle");
+          if (pElement) pElement.style.display = "none";
+          if (handleElement) handleElement.style.display = "none";
+
+          const input = document.createElement("input");
+          input.type = "text";
+          input.value = textObj.text;
+          input.onclick = (e) => e.stopPropagation();
+
+          // Re-use the existing wrapper for the input
+          wrapper.classList.add("text-input-wrapper");
+          wrapper.appendChild(input);
+          requestAnimationFrame(() => input.select());
+
+          const finalizeEdit = () => {
+            const newTextValue = input.value.trim();
+            const textsForSlide =
+              this.texts.get(this.slideshow.currentSlideIndex) || [];
+            const textToUpdateIndex = textsForSlide.findIndex(
+              (t) => t.id === id
+            );
+
+            if (textToUpdateIndex > -1) {
+              if (newTextValue) {
+                textsForSlide[textToUpdateIndex].text = newTextValue;
+              } else {
+                textsForSlide.splice(textToUpdateIndex, 1);
+              }
+            }
+
+            this.texts.set(this.slideshow.currentSlideIndex, textsForSlide);
+            this.loadText(this.slideshow.currentSlideIndex);
+          };
+
+          input.addEventListener("blur", finalizeEdit, { once: true });
+          input.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") input.blur();
+          });
+        }
+
+        loadText(slideIndex) {
+          this.textOverlay.innerHTML = "";
+          const currentTexts = this.texts.get(slideIndex) || [];
+          currentTexts.forEach((textObj) => {
+            const wrapper = document.createElement("div");
+            wrapper.className = "draggable-text-wrapper";
+            wrapper.style.left = `${textObj.x}px`;
+            wrapper.style.top = `${textObj.y}px`;
+            wrapper.dataset.textId = textObj.id;
+
+            const handle = document.createElement("div");
+            handle.className = "move-handle";
+            handle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M15 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M9 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M15 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M9 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M15 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /></svg>`;
+
+            const p = document.createElement("p");
+            p.textContent = textObj.text;
+            p.className = "text-slate-800 text-lg font-semibold";
+
+            wrapper.appendChild(handle);
+            wrapper.appendChild(p);
+            this.textOverlay.appendChild(wrapper);
+          });
+        }
+
+        startDrag(e) {
+          this.draggedText = e.target.closest(".draggable-text-wrapper");
+          if (!this.draggedText) return;
+
+          e.preventDefault();
+
+          this.draggedText.classList.add("dragging");
+          const rect = this.draggedText.getBoundingClientRect();
+
+          this.offsetX = e.clientX - rect.left;
+          this.offsetY = e.clientY - rect.top;
+
+          document.addEventListener("mousemove", this.drag);
+          document.addEventListener("mouseup", this.endDrag);
+          document.addEventListener("touchmove", this.drag, { passive: false });
+          document.addEventListener("touchend", this.endDrag);
+        }
+
+        drag(e) {
+          if (!this.draggedText) return;
+          e.preventDefault();
+
+          const event = e.touches ? e.touches[0] : e;
+          const containerRect = this.container.getBoundingClientRect();
+
+          const newX = event.clientX - containerRect.left - this.offsetX;
+          const newY = event.clientY - containerRect.top - this.offsetY;
+
+          this.draggedText.style.left = `${newX}px`;
+          this.draggedText.style.top = `${newY}px`;
+        }
+
+        endDrag() {
+          if (!this.draggedText) return;
+
+          document.removeEventListener("mousemove", this.drag);
+          document.removeEventListener("mouseup", this.endDrag);
+          document.removeEventListener("touchmove", this.drag);
+          document.removeEventListener("touchend", this.endDrag);
+
+          this.draggedText.classList.remove("dragging");
+
+          const id = parseFloat(this.draggedText.dataset.textId);
+          const currentTexts =
+            this.texts.get(this.slideshow.currentSlideIndex) || [];
+          const textObj = currentTexts.find((t) => t.id === id);
+
+          if (textObj) {
+            textObj.x = parseFloat(this.draggedText.style.left);
+            textObj.y = parseFloat(this.draggedText.style.top);
+            this.texts.set(this.slideshow.currentSlideIndex, currentTexts);
+          }
+
+          this.draggedText = null;
+        }
+
+        eraseText(target) {
+          const wrapper = target.closest(".draggable-text-wrapper");
+          if (!wrapper) return;
+
+          const id = parseFloat(wrapper.dataset.textId);
+          let currentTexts =
+            this.texts.get(this.slideshow.currentSlideIndex) || [];
+          currentTexts = currentTexts.filter((t) => t.id !== id);
+          this.texts.set(this.slideshow.currentSlideIndex, currentTexts);
+          wrapper.remove();
+        }
+
+        eraseLine(x, y) {
+          const t = this.lines.get(this.slideshow.currentSlideIndex) || [];
+          let e = -1;
+          for (let i = 0; i < t.length; i++) {
+            for (let s = 0; s < t[i].points.length - 1; s++) {
+              const h = t[i].points[s],
+                n = t[i].points[s + 1];
               if (
-                this.pointToLineDistance(t, e, r.x, r.y, o.x, o.y) <
+                this.pointToLineDistance(x, y, h.x, h.y, n.x, n.y) <
                 this.proximityThreshold
               ) {
-                s = h;
+                e = i;
                 break;
               }
             }
-            if (-1 !== s) break;
+            if (-1 !== e) break;
           }
-          -1 !== s &&
-            (i.splice(s, 1),
-            this.lines.set(this.slideshow.currentSlideIndex, i),
-            this.redraw(this.slideshow.currentSlideIndex));
+          if (-1 !== e) {
+            t.splice(e, 1);
+            this.lines.set(this.slideshow.currentSlideIndex, t);
+            this.redrawLines(this.slideshow.currentSlideIndex);
+          }
         }
         pointToLineDistance(t, e, i, s, h, n) {
           const r = t - i,
@@ -675,41 +982,60 @@
             w = e - (x = u < 0 ? s : u > 1 ? n : s + u * d);
           return Math.sqrt(g * g + w * w);
         }
-        redraw(t) {
+
+        redrawLines(slideIndex) {
           this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-          (this.lines.get(t) || []).forEach((t) => {
-            if (t.points.length < 2) return;
-            this.ctx.beginPath(),
-              (this.ctx.lineWidth = this.penWidth),
-              (this.ctx.strokeStyle = this.penColor),
-              (this.ctx.lineCap = "round"),
-              this.ctx.moveTo(t.points[0].x, t.points[0].y);
-            for (let e = 1; e < t.points.length; e++)
-              this.ctx.lineTo(t.points[e].x, t.points[e].y);
+          const currentLines = this.lines.get(slideIndex) || [];
+          currentLines.forEach((line) => {
+            if (line.points.length < 2) return;
+            this.ctx.beginPath();
+            this.ctx.lineWidth = this.penWidth;
+            this.ctx.strokeStyle = this.penColor;
+            this.ctx.lineCap = "round";
+            this.ctx.moveTo(line.points[0].x, line.points[0].y);
+            for (let i = 1; i < line.points.length; i++)
+              this.ctx.lineTo(line.points[i].x, line.points[i].y);
             this.ctx.stroke();
           });
         }
-        setMode(t) {
-          (this.drawingMode = t),
-            document.body.classList.toggle("drawing-active", "none" !== t),
-            Object.values(this.controls).forEach((t) =>
-              t.classList.remove("active")
-            ),
-            "pen" === t
-              ? this.controls.pen.classList.add("active")
-              : "line-eraser" === t
-              ? this.controls.eraser.classList.add("active")
-              : "none" === t && this.controls.neutral.classList.add("active");
+
+        clearCurrentSlide() {
+          this.lines.delete(this.slideshow.currentSlideIndex);
+          this.texts.delete(this.slideshow.currentSlideIndex);
+          this.loadAnnotations(this.slideshow.currentSlideIndex);
         }
-        clearCanvas() {
-          this.lines.delete(this.slideshow.currentSlideIndex),
-            this.redraw(this.slideshow.currentSlideIndex);
+
+        setMode(mode) {
+          this.mode = mode;
+          document.body.classList.toggle(
+            "drawing-active",
+            mode === "pen" || mode === "line-eraser"
+          );
+          document.body.classList.toggle("text-active", mode === "text");
+          Object.values(this.controls).forEach((btn) =>
+            btn.classList.remove("active")
+          );
+
+          const modeToControlMap = {
+            pen: "pen",
+            text: "text",
+            "line-eraser": "eraser",
+            none: "neutral",
+          };
+          const controlKey = modeToControlMap[mode];
+          if (this.controls[controlKey]) {
+            this.controls[controlKey].classList.add("active");
+          }
         }
-        saveDrawing(t) {
-          this.lines.set(t, this.lines.get(t) || []);
+
+        saveAnnotations(slideIndex) {
+          this.lines.set(slideIndex, this.lines.get(slideIndex) || []);
+          this.texts.set(slideIndex, this.texts.get(slideIndex) || []);
         }
-        loadDrawing(t) {
-          this.redraw(t);
+
+        loadAnnotations(slideIndex) {
+          this.redrawLines(slideIndex);
+          this.loadText(slideIndex);
         }
       }
 
@@ -752,6 +1078,7 @@
       function initializeSlideshow(data) {
         allSlidesData = buildSlidesFromData(data);
         initSlides();
+
         const firstSlide = slideshowContainer.querySelector(".slide");
         if (firstSlide) {
           firstSlide.style.visibility = "visible";
@@ -762,38 +1089,53 @@
           isAnimating = true;
           animateSlideIn(firstSlide);
         }
+
         const penButton = document.getElementById("pen-button");
+        const textButton = document.getElementById("text-button");
         const eraserButton = document.getElementById("eraser-button");
         const clearButton = document.getElementById("clear-button");
         const neutralButton = document.getElementById("neutral-button");
-        drawingManager = new DrawingManager(
+
+        annotationManager = new AnnotationManager(
           slideshowContainer,
           {
             get currentSlideIndex() {
               return currentSlideIndex;
             },
           },
-          { pen: penButton, eraser: eraserButton, neutral: neutralButton }
+          {
+            pen: penButton,
+            text: textButton,
+            eraser: eraserButton,
+            neutral: neutralButton,
+          }
         );
+
         penButton.addEventListener("click", (e) => {
           e.stopPropagation();
-          drawingManager.setMode("pen");
+          annotationManager.setMode("pen");
+        });
+        textButton.addEventListener("click", (e) => {
+          e.stopPropagation();
+          annotationManager.setMode("text");
         });
         eraserButton.addEventListener("click", (e) => {
           e.stopPropagation();
-          drawingManager.setMode("line-eraser");
+          annotationManager.setMode("line-eraser");
         });
         clearButton.addEventListener("click", (e) => {
           e.stopPropagation();
-          drawingManager.clearCanvas();
+          annotationManager.clearCurrentSlide();
         });
         neutralButton.addEventListener("click", (e) => {
           e.stopPropagation();
-          drawingManager.setMode("none");
+          annotationManager.setMode("none");
         });
-        drawingManager.setMode("none");
+
+        annotationManager.setMode("none");
         setupParticles();
       }
+
       window.addEventListener("load", main);
     </script>
   </body>
