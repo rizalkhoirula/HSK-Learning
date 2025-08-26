@@ -241,47 +241,9 @@
       }
 
       // --- Text-to-Speech Function ---
-      function speak(text, lang = "zh-CN") {
-        if ('speechSynthesis' in window) {
-          // Cancel any previous speech to allow for immediate replay
-          speechSynthesis.cancel();
-
-          // Create a new utterance
-          const utterance = new SpeechSynthesisUtterance(text);
-          
-          // Get available voices
-          const voices = speechSynthesis.getVoices();
-          const chineseVoice = voices.find(voice => voice.lang.startsWith(lang));
-
-          if (chineseVoice) {
-            utterance.voice = chineseVoice;
-          } else {
-            // If the desired voice isn't found, we'll rely on the browser's language selection.
-            // This is a common scenario as voice loading can be asynchronous.
-            console.warn(`Voice for '${lang}' not found. Using browser default.`);
-          }
-          
-          utterance.lang = lang;
-          speechSynthesis.speak(utterance);
-        } else {
-          console.error('Speech synthesis not supported in this browser.');
-          // Fallback to the old method if needed
-          playAudio(text, lang); 
-        }
-      }
-
-      // Pre-load voices when the page loads
-      if ('speechSynthesis' in window) {
-        speechSynthesis.onvoiceschanged = () => {
-          // This event fires when the voice list is ready.
-          // We can log them to see what's available.
-          console.log("Voices loaded:", speechSynthesis.getVoices().map(v => v.name));
-        };
-      }
-
       function playAudio(text, lang = "zh-CN") {
         try {
-          // This uses an unofficial Google Translate TTS endpoint as a fallback.
+          // This uses an unofficial Google Translate TTS endpoint.
           const url = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&q=${encodeURIComponent(
             text
           )}&tl=${lang}`;
@@ -447,7 +409,7 @@
                         <p class="pinyin text-base text-slate-500">${ex.pinyin}</p>
                         <p class="translation text-base text-indigo-600">${ex.indonesian}</p>
                     </div>
-                    <button onclick="event.stopPropagation(); speak('${ex.hanzi}')" class="p-2 rounded-full text-sky-500 hover:bg-sky-100 transition-colors flex-shrink-0">
+                    <button onclick="event.stopPropagation(); playAudio('${ex.hanzi}')" class="p-2 rounded-full text-sky-500 hover:bg-sky-100 transition-colors flex-shrink-0">
                          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M15 8a5 5 0 0 1 0 8"></path><path d="M17.7 5a9 9 0 0 1 0 14"></path><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"></path></svg>
                     </button>
                 </div>
@@ -456,17 +418,17 @@
             .join("");
 
           slide.innerHTML = `
-                <div class="anim-el w-full flex flex-col items-center justify-center text-center">
+                <div class="anim-el w-full flex flex-col items-center justify-center text-center flex-grow">
                     <div class="flex items-center justify-center gap-x-4">
                         <h1 class="hanzi text-7xl md:text-8xl font-bold text-slate-800">${word.hanzi}</h1>
-                        <button onclick="event.stopPropagation(); speak('${word.hanzi}')" class="p-3 rounded-full text-sky-500 hover:bg-sky-100 transition-colors">
+                        <button onclick="event.stopPropagation(); playAudio('${word.hanzi}')" class="p-3 rounded-full text-sky-500 hover:bg-sky-100 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M15 8a5 5 0 0 1 0 8"></path><path d="M17.7 5a9 9 0 0 1 0 14"></path><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"></path></svg>
                         </button>
                     </div>
                     <h2 class="pinyin text-3xl md:text-4xl text-slate-600 mt-2 mb-4">${word.pinyin}</h2>
                     <h3 class="text-2xl md:text-3xl font-semibold text-indigo-600 capitalize">${word.indonesian}</h3>
                 </div>
-                <div class="anim-el w-full max-w-3xl mt-4 pt-4 border-t-2 border-slate-200/80">
+                <div class="anim-el w-full max-w-3xl mt-6 pt-6 border-t-2 border-slate-200/80">
                      <h4 class="text-xl font-bold text-slate-700 mb-4 text-center">Contoh Penggunaan:</h4>
                      <div class="space-y-3">
                         ${examplesHtml}
@@ -475,36 +437,28 @@
             `;
         } else if (slideData.type === "dialog") {
           const conversationItems = slideData.conversation
-            .map((line, index) => {
-              const isA = index % 2 === 0;
-              const bgColor = isA ? "bg-slate-100/80" : "bg-white/80";
-              const textAlign = isA ? "text-left" : "text-right";
-              const personClass = isA
-                ? "bg-blue-500 text-white"
-                : "bg-green-500 text-white";
-              const personLabel = isA ? "A" : "B";
-              const itemFlexDirection = isA ? "flex-row" : "flex-row-reverse";
-
-              return `
-                <li class="anim-el flex ${itemFlexDirection} items-start gap-4">
-                    <div class="flex-shrink-0 w-10 h-10 rounded-full ${personClass} flex items-center justify-center font-bold text-lg">
-                        ${personLabel}
+            .map(
+              (line, index) => `
+                <li class="anim-el p-4 rounded-lg ${
+                  index % 2 === 0 ? "bg-slate-100/80" : "bg-white/80"
+                } shadow-sm flex items-center justify-between gap-4">
+                    <div>
+                        <p class="hanzi text-slate-800 text-lg">${
+                          line.hanzi
+                        }</p>
+                        <p class="pinyin text-slate-500">${line.pinyin}</p>
+                        <p class="translation text-indigo-600 mt-1 font-medium">${
+                          line.indonesian
+                        }</p>
                     </div>
-                    <div class="flex-grow p-4 rounded-lg ${bgColor} shadow-sm">
-                        <div class="flex items-center justify-between gap-4">
-                            <div class="${textAlign}">
-                                <p class="hanzi text-slate-800 text-lg">${line.hanzi}</p>
-                                <p class="pinyin text-slate-500">${line.pinyin}</p>
-                                <p class="translation text-indigo-600 mt-1 font-medium">${line.indonesian}</p>
-                            </div>
-                            <button onclick="event.stopPropagation(); speak('${line.hanzi}')" class="p-2 rounded-full text-sky-500 hover:bg-sky-100 transition-colors flex-shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M15 8a5 5 0 0 1 0 8"></path><path d="M17.7 5a9 9 0 0 1 0 14"></path><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"></path></svg>
-                            </button>
-                        </div>
-                    </div>
+                    <button onclick="event.stopPropagation(); playAudio('${
+                      line.hanzi
+                    }')" class="p-2 rounded-full text-sky-500 hover:bg-sky-100 transition-colors flex-shrink-0">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M15 8a5 5 0 0 1 0 8"></path><path d="M17.7 5a9 9 0 0 1 0 14"></path><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"></path></svg>
+                    </button>
                 </li>
-            `;
-            })
+            `
+            )
             .join("");
 
           slide.classList.remove("text-center", "items-center");
@@ -512,7 +466,7 @@
           slide.innerHTML = `
                 <h2 class="anim-el text-3xl md:text-5xl font-bold mb-6 self-center text-purple-600 hanzi">${slideData.topic}</h2>
                 <div class="w-full flex-grow overflow-y-auto custom-scrollbar pr-4">
-                    <ul class="space-y-4">${conversationItems}</ul>
+                    <ul class="space-y-4 text-left">${conversationItems}</ul>
                 </div>
             `;
         } else if (slideData.type === "closing") {

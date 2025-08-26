@@ -1,0 +1,425 @@
+{
+  "HSK2": {
+    "words": [
+      {
+        "hanzi": "颜色",
+        "pinyin": "yánsè",
+        "indonesian": "warna",
+        "examples": [
+          {"hanzi": "你喜欢什么颜色？", "pinyin": "Nǐ xǐhuān shénme yánsè?", "indonesian": "Kamu suka warna apa?"},
+          {"hanzi": "红色是我的最爱。", "pinyin": "Hóngsè shì wǒ de zuì ài.", "indonesian": "Merah adalah favoritku."}
+        ]
+      },
+      {
+        "hanzi": "运动",
+        "pinyin": "yùndòng",
+        "indonesian": "olahraga",
+        "examples": [
+          {"hanzi": "我每天早上运动。", "pinyin": "Wǒ měitiān zǎoshang yùndòng.", "indonesian": "Saya berolahraga setiap pagi."},
+          {"hanzi": "运动对身体很好。", "pinyin": "Yùndòng duì shēntǐ hěn hǎo.", "indonesian": "Olahraga baik untuk tubuh."}
+        ]
+      },
+      {
+        "hanzi": "旁边",
+        "pinyin": "pángbiān",
+        "indonesian": "sebelah/samping",
+        "examples": [
+          {"hanzi": "银行在学校旁边。", "pinyin": "Yínháng zài xuéxiào pángbiān.", "indonesian": "Bank ada di samping sekolah."},
+          {"hanzi": "请坐在我旁边。", "pinyin": "Qǐng zuò zài wǒ pángbiān.", "indonesian": "Silakan duduk di samping saya."}
+        ]
+      },
+      {
+        "hanzi": "丈夫",
+        "pinyin": "zhàngfu",
+        "indonesian": "suami",
+        "examples": [
+          {"hanzi": "她的丈夫很高。", "pinyin": "Tā de zhàngfu hěn gāo.", "indonesian": "Suaminya tinggi."},
+          {"hanzi": "我丈夫在公司工作。", "pinyin": "Wǒ zhàngfu zài gōngsī gōngzuò.", "indonesian": "Suamiku bekerja di perusahaan."}
+        ]
+      },
+      {
+        "hanzi": "生病",
+        "pinyin": "shēngbìng",
+        "indonesian": "sakit",
+        "examples": [
+          {"hanzi": "我昨天生病了。", "pinyin": "Wǒ zuótiān shēngbìng le.", "indonesian": "Saya kemarin sakit."},
+          {"hanzi": "生病的时候要多休息。", "pinyin": "Shēngbìng de shíhou yào duō xiūxi.", "indonesian": "Saat sakit harus banyak istirahat."}
+        ]
+      },
+      {
+        "hanzi": "问题",
+        "pinyin": "wèntí",
+        "indonesian": "masalah/pertanyaan",
+        "examples": [
+          {"hanzi": "你有什么问题吗？", "pinyin": "Nǐ yǒu shénme wèntí ma?", "indonesian": "Apakah kamu ada pertanyaan?"},
+          {"hanzi": "这个问题很容易。", "pinyin": "Zhège wèntí hěn róngyì.", "indonesian": "Pertanyaan ini sangat mudah."}
+        ]
+      },
+      {
+        "hanzi": "准备",
+        "pinyin": "zhǔnbèi",
+        "indonesian": "mempersiapkan",
+        "examples": [
+          {"hanzi": "我准备好了。", "pinyin": "Wǒ zhǔnbèi hǎo le.", "indonesian": "Saya sudah siap."},
+          {"hanzi": "我们准备去旅行。", "pinyin": "Wǒmen zhǔnbèi qù lǚxíng.", "indonesian": "Kami bersiap untuk bepergian."}
+        ]
+      },
+      {
+        "hanzi": "旅游",
+        "pinyin": "lǚyóu",
+        "indonesian": "perjalanan wisata",
+        "examples": [
+          {"hanzi": "我喜欢去旅游。", "pinyin": "Wǒ xǐhuān qù lǚyóu.", "indonesian": "Saya suka bepergian."},
+          {"hanzi": "旅游可以学习很多东西。", "pinyin": "Lǚyóu kěyǐ xuéxí hěn duō dōngxi.", "indonesian": "Perjalanan bisa membuat kita belajar banyak hal."}
+        ]
+      },
+      {
+        "hanzi": "快乐",
+        "pinyin": "kuàilè",
+        "indonesian": "senang",
+        "examples": [
+          {"hanzi": "祝你生日快乐！", "pinyin": "Zhù nǐ shēngrì kuàilè!", "indonesian": "Selamat ulang tahun!"},
+          {"hanzi": "今天我很快乐。", "pinyin": "Jīntiān wǒ hěn kuàilè.", "indonesian": "Hari ini saya sangat senang."}
+        ]
+      },
+      {
+        "hanzi": "希望",
+        "pinyin": "xīwàng",
+        "indonesian": "harap/berharap",
+        "examples": [
+          {"hanzi": "我希望你来。", "pinyin": "Wǒ xīwàng nǐ lái.", "indonesian": "Saya berharap kamu datang."},
+          {"hanzi": "希望明天天气好。", "pinyin": "Xīwàng míngtiān tiānqì hǎo.", "indonesian": "Semoga besok cuacanya baik."}
+        ]
+      }
+    ],
+    "dialog_transition": [
+      {
+        "topic": "Belanja di toko",
+        "conversation": [
+          {"hanzi": "这件衣服多少钱？", "pinyin": "Zhè jiàn yīfu duōshǎo qián?", "indonesian": "Baju ini berapa harganya?"},
+          {"hanzi": "一百块。", "pinyin": "Yī bǎi kuài.", "indonesian": "Seratus yuan."},
+          {"hanzi": "可以便宜一点吗？", "pinyin": "Kěyǐ piányi yīdiǎn ma?", "indonesian": "Bisa lebih murah sedikit tidak?"},
+          {"hanzi": "不能再便宜了，这是最低价格。", "pinyin": "Bù néng zài piányi le, zhè shì zuìdī jiàgé.", "indonesian": "Tidak bisa lebih murah lagi, ini harga paling rendah."},
+          {"hanzi": "好吧，这件衬衫呢？", "pinyin": "Hǎo ba, zhè jiàn chènshān ne?", "indonesian": "Baiklah, kalau kemeja ini?"},
+          {"hanzi": "衬衫七十块。", "pinyin": "Chènshān qīshí kuài.", "indonesian": "Kemeja tujuh puluh yuan."},
+          {"hanzi": "太贵了，五十块可以吗？", "pinyin": "Tài guì le, wǔshí kuài kěyǐ ma?", "indonesian": "Terlalu mahal, lima puluh yuan boleh tidak?"},
+          {"hanzi": "不行，最多六十五。", "pinyin": "Bùxíng, zuìduō liùshíwǔ.", "indonesian": "Tidak bisa, paling banyak enam puluh lima."},
+          {"hanzi": "好的，我买这件。", "pinyin": "Hǎo de, wǒ mǎi zhè jiàn.", "indonesian": "Baik, saya beli yang ini."},
+          {"hanzi": "谢谢，请到这边付款。", "pinyin": "Xièxie, qǐng dào zhèbiān fùkuǎn.", "indonesian": "Terima kasih, silakan bayar di sebelah sini."}
+        ]
+      },
+      {
+        "topic": "Makanan kesukaan",
+        "conversation": [
+          {"hanzi": "你喜欢吃什么？", "pinyin": "Nǐ xǐhuān chī shénme?", "indonesian": "Kamu suka makan apa?"},
+          {"hanzi": "我喜欢吃米饭。", "pinyin": "Wǒ xǐhuān chī mǐfàn.", "indonesian": "Saya suka makan nasi."},
+          {"hanzi": "我也喜欢吃米饭。", "pinyin": "Wǒ yě xǐhuān chī mǐfàn.", "indonesian": "Saya juga suka makan nasi."},
+          {"hanzi": "你喜欢吃面条吗？", "pinyin": "Nǐ xǐhuān chī miàntiáo ma?", "indonesian": "Kamu suka makan mi?"},
+          {"hanzi": "我不太喜欢。", "pinyin": "Wǒ bú tài xǐhuān.", "indonesian": "Saya tidak terlalu suka."},
+          {"hanzi": "那你喜欢吃什么水果？", "pinyin": "Nà nǐ xǐhuān chī shénme shuǐguǒ?", "indonesian": "Kalau begitu, kamu suka makan buah apa?"},
+          {"hanzi": "我喜欢吃西瓜。", "pinyin": "Wǒ xǐhuān chī xīguā.", "indonesian": "Saya suka makan semangka."},
+          {"hanzi": "西瓜很甜，我也喜欢。", "pinyin": "Xīguā hěn tián, wǒ yě xǐhuān.", "indonesian": "Semangka manis, saya juga suka."},
+          {"hanzi": "我们一起去买西瓜吧。", "pinyin": "Wǒmen yīqǐ qù mǎi xīguā ba.", "indonesian": "Ayo kita pergi beli semangka bersama."},
+          {"hanzi": "好的，走吧！", "pinyin": "Hǎo de, zǒu ba!", "indonesian": "Baik, ayo!"}
+        ]
+      },
+      {
+        "topic": "Perkenalan keluarga",
+        "conversation": [
+          {"hanzi": "你家有几口人？", "pinyin": "Nǐ jiā yǒu jǐ kǒu rén?", "indonesian": "Keluargamu ada berapa orang?"},
+          {"hanzi": "我家有五口人。", "pinyin": "Wǒ jiā yǒu wǔ kǒu rén.", "indonesian": "Keluargaku ada lima orang."},
+          {"hanzi": "你哥哥做什么工作？", "pinyin": "Nǐ gēge zuò shénme gōngzuò?", "indonesian": "Kakakmu bekerja apa?"},
+          {"hanzi": "他是医生。", "pinyin": "Tā shì yīshēng.", "indonesian": "Dia adalah seorang dokter."},
+          {"hanzi": "你姐姐呢？", "pinyin": "Nǐ jiějie ne?", "indonesian": "Kalau kakak perempuanmu?"},
+          {"hanzi": "她是一名老师。", "pinyin": "Tā shì yī míng lǎoshī.", "indonesian": "Dia adalah seorang guru."},
+          {"hanzi": "你爸爸妈妈也工作吗？", "pinyin": "Nǐ bàba māma yě gōngzuò ma?", "indonesian": "Ayah dan ibumu juga bekerja?"},
+          {"hanzi": "我爸爸是工程师，妈妈是家庭主妇。", "pinyin": "Wǒ bàba shì gōngchéngshī, māmā shì jiātíng zhǔfù.", "indonesian": "Ayah saya insinyur, ibu saya ibu rumah tangga."},
+          {"hanzi": "真好，你的家庭很幸福。", "pinyin": "Zhēn hǎo, nǐ de jiātíng hěn xìngfú.", "indonesian": "Bagus sekali, keluargamu sangat bahagia."},
+          {"hanzi": "谢谢！", "pinyin": "Xièxie!", "indonesian": "Terima kasih!"}
+        ]
+      }
+    ]
+  },
+  "HSK3": {
+    "words": [
+      {
+        "hanzi": "服务员",
+        "pinyin": "fúwùyuán",
+        "indonesian": "pelayan",
+        "examples": [
+          {"hanzi": "服务员，请来一杯水。", "pinyin": "Fúwùyuán, qǐng lái yī bēi shuǐ.", "indonesian": "Pelayan, tolong ambilkan segelas air."},
+          {"hanzi": "那位服务员很热情。", "pinyin": "Nà wèi fúwùyuán hěn rèqíng.", "indonesian": "Pelayan itu sangat ramah."}
+        ]
+      },
+      {
+        "hanzi": "健康",
+        "pinyin": "jiànkāng",
+        "indonesian": "sehat",
+        "examples": [
+          {"hanzi": "祝你身体健康。", "pinyin": "Zhù nǐ shēntǐ jiànkāng.", "indonesian": "Semoga kamu sehat selalu."},
+          {"hanzi": "多运动可以保持健康。", "pinyin": "Duō yùndòng kěyǐ bǎochí jiànkāng.", "indonesian": "Banyak berolahraga bisa menjaga kesehatan."}
+        ]
+      },
+      {
+        "hanzi": "公斤",
+        "pinyin": "gōngjīn",
+        "indonesian": "kilogram",
+        "examples": [
+          {"hanzi": "这个西瓜有三公斤重。", "pinyin": "Zhège xīguā yǒu sān gōngjīn zhòng.", "indonesian": "Semangka ini beratnya tiga kilogram."},
+          {"hanzi": "我买了五公斤苹果。", "pinyin": "Wǒ mǎile wǔ gōngjīn píngguǒ.", "indonesian": "Saya membeli lima kilogram apel."}
+        ]
+      },
+      {
+        "hanzi": "太阳",
+        "pinyin": "tàiyáng",
+        "indonesian": "matahari",
+        "examples": [
+          {"hanzi": "太阳出来了。", "pinyin": "Tàiyáng chūlái le.", "indonesian": "Matahari sudah muncul."},
+          {"hanzi": "今天太阳很大。", "pinyin": "Jīntiān tàiyáng hěn dà.", "indonesian": "Hari ini mataharinya sangat terik."}
+        ]
+      },
+      {
+        "hanzi": "新鲜",
+        "pinyin": "xīnxiān",
+        "indonesian": "segar",
+        "examples": [
+          {"hanzi": "这里的蔬菜很新鲜。", "pinyin": "Zhèlǐ de shūcài hěn xīnxiān.", "indonesian": "Sayuran di sini sangat segar."},
+          {"hanzi": "请给我来一杯新鲜的果汁。", "pinyin": "Qǐng gěi wǒ lái yī bēi xīnxiān de guǒzhī.", "indonesian": "Tolong berikan saya segelas jus buah segar."}
+        ]
+      },
+      {
+        "hanzi": "决定",
+        "pinyin": "juédìng",
+        "indonesian": "memutuskan",
+        "examples": [
+          {"hanzi": "你决定去哪儿了吗？", "pinyin": "Nǐ juédìng qù nǎr le ma?", "indonesian": "Apakah kamu sudah memutuskan mau pergi ke mana?"},
+          {"hanzi": "我决定明天开始学习汉语。", "pinyin": "Wǒ juédìng míngtiān kāishǐ xuéxí Hànyǔ.", "indonesian": "Saya memutuskan untuk mulai belajar bahasa Mandarin besok."}
+        ]
+      },
+      {
+        "hanzi": "衬衫",
+        "pinyin": "chènshān",
+        "indonesian": "kemeja",
+        "examples": [
+          {"hanzi": "这件衬衫很漂亮。", "pinyin": "Zhè jiàn chènshān hěn piàoliang.", "indonesian": "Kemeja ini sangat cantik."},
+          {"hanzi": "我买了一件白衬衫。", "pinyin": "Wǒ mǎile yī jiàn bái chènshān.", "indonesian": "Saya membeli sebuah kemeja putih."}
+        ]
+      },
+      {
+        "hanzi": "终于",
+        "pinyin": "zhōngyú",
+        "indonesian": "akhirnya",
+        "examples": [
+          {"hanzi": "我们终于到了。", "pinyin": "Wǒmen zhōngyú dàole.", "indonesian": "Akhirnya kita sampai."},
+          {"hanzi": "我终于学会了开车。", "pinyin": "Wǒ zhōngyú xuéhuìle kāichē.", "indonesian": "Saya akhirnya belajar mengemudi."}
+        ]
+      },
+      {
+        "hanzi": "环境",
+        "pinyin": "huánjìng",
+        "indonesian": "lingkungan",
+        "examples": [
+          {"hanzi": "这里的环境很好。", "pinyin": "Zhèlǐ de huánjìng hěn hǎo.", "indonesian": "Lingkungan di sini sangat baik."},
+          {"hanzi": "我们要保护环境。", "pinyin": "Wǒmen yào bǎohù huánjìng.", "indonesian": "Kita harus melindungi lingkungan."}
+        ]
+      },
+      {
+        "hanzi": "洗澡",
+        "pinyin": "xǐzǎo",
+        "indonesian": "mandi",
+        "examples": [
+          {"hanzi": "你洗澡了吗？", "pinyin": "Nǐ xǐzǎo le ma?", "indonesian": "Apakah kamu sudah mandi?"},
+          {"hanzi": "我每天晚上洗澡。", "pinyin": "Wǒ měitiān wǎnshang xǐzǎo.", "indonesian": "Saya mandi setiap malam."}
+        ]
+      }
+    ],
+    "dialog_transition": [
+      {
+        "topic": "Memesan makanan",
+        "conversation": [
+          {"hanzi": "服务员，请问有什么好吃的？", "pinyin": "Fúwùyuán, qǐngwèn yǒu shénme hǎochī de?", "indonesian": "Pelayan, ada makanan enak apa?"},
+          {"hanzi": "我们有新鲜的鱼和牛肉。", "pinyin": "Wǒmen yǒu xīnxiān de yú hé niúròu.", "indonesian": "Kami punya ikan dan daging sapi yang segar."},
+          {"hanzi": "我要一份鱼，谢谢。", "pinyin": "Wǒ yào yī fèn yú, xièxie.", "indonesian": "Saya mau satu porsi ikan, terima kasih."},
+          {"hanzi": "好的，请稍等。", "pinyin": "Hǎo de, qǐng shāoděng.", "indonesian": "Baik, mohon tunggu sebentar."},
+          {"hanzi": "你还要喝点什么吗？", "pinyin": "Nǐ hái yào hē diǎn shénme ma?", "indonesian": "Kamu mau minum apa lagi?"},
+          {"hanzi": "我要一杯新鲜的果汁。", "pinyin": "Wǒ yào yī bēi xīnxiān de guǒzhī.", "indonesian": "Saya mau segelas jus buah segar."},
+          {"hanzi": "好的，马上给你拿过来。", "pinyin": "Hǎo de, mǎshàng gěi nǐ ná guòlái.", "indonesian": "Baik, segera saya bawakan."},
+          {"hanzi": "这里的环境很舒服。", "pinyin": "Zhèlǐ de huánjìng hěn shūfu.", "indonesian": "Lingkungan di sini sangat nyaman."},
+          {"hanzi": "是的，我觉得很不错。", "pinyin": "Shì de, wǒ juéde hěn búcuò.", "indonesian": "Ya, saya rasa sangat bagus."},
+          {"hanzi": "你的鱼来了，请慢用。", "pinyin": "Nǐ de yú láile, qǐng màn yòng.", "indonesian": "Ikannya sudah datang, silakan dinikmati."}
+        ]
+      },
+      {
+        "topic": "Bertanya arah",
+        "conversation": [
+          {"hanzi": "请问，去火车站怎么走？", "pinyin": "Qǐngwèn, qù huǒchēzhàn zěnme zǒu?", "indonesian": "Permisi, bagaimana cara ke stasiun kereta?"},
+          {"hanzi": "你可以坐公共汽车或者打车。", "pinyin": "Nǐ kěyǐ zuò gōnggòng qìchē huòzhě dǎchē.", "indonesian": "Kamu bisa naik bus atau taksi."},
+          {"hanzi": "公共汽车站在哪儿？", "pinyin": "Gōnggòng qìchēzhàn zài nǎr?", "indonesian": "Halte busnya di mana?"},
+          {"hanzi": "就在前面，走三分钟就到了。", "pinyin": "Jiù zài qiánmiàn, zǒu sān fēnzhōng jiù dàole.", "indonesian": "Ada di depan, jalan kaki tiga menit sudah sampai."},
+          {"hanzi": "坐公共汽车需要多长时间？", "pinyin": "Zuò gōnggòng qìchē xūyào duō cháng shíjiān?", "indonesian": "Naik bus butuh berapa lama?"},
+          {"hanzi": "大概二十分钟。", "pinyin": "Dàgài èrshí fēnzhōng.", "indonesian": "Sekitar dua puluh menit."},
+          {"hanzi": "谢谢你的帮助。", "pinyin": "Xièxie nǐ de bāngzhù.", "indonesian": "Terima kasih atas bantuannya."},
+          {"hanzi": "不客气。", "pinyin": "Bú kèqi.", "indonesian": "Sama-sama."},
+          {"hanzi": "对了，你知道火车票多少钱吗？", "pinyin": "Duìle, nǐ zhīdào huǒchēpiào duōshǎo qián ma?", "indonesian": "Ngomong-ngomong, kamu tahu berapa harga tiket kereta?"},
+          {"hanzi": "我不太清楚，你可以问一下售票员。", "pinyin": "Wǒ bú tài qīngchǔ, nǐ kěyǐ wèn yīxià shòupiàoyuán.", "indonesian": "Saya tidak begitu tahu, kamu bisa tanya petugas loket."}
+        ]
+      },
+      {
+        "topic": "Kesehatan",
+        "conversation": [
+          {"hanzi": "最近你身体怎么样？", "pinyin": "Zuìjìn nǐ shēntǐ zěnmeyàng?", "indonesian": "Akhir-akhir ini badanmu bagaimana?"},
+          {"hanzi": "不太好，我有点感冒。", "pinyin": "Bú tài hǎo, wǒ yǒudiǎn gǎnmào.", "indonesian": "Tidak terlalu baik, saya sedikit flu."},
+          {"hanzi": "要注意休息，多喝水。", "pinyin": "Yào zhùyì xiūxi, duō hē shuǐ.", "indonesian": "Harus perhatikan istirahat, banyak minum air."},
+          {"hanzi": "我晚上睡不好。", "pinyin": "Wǒ wǎnshang shuì bù hǎo.", "indonesian": "Saya tidak bisa tidur nyenyak di malam hari."},
+          {"hanzi": "可能跟生病有关系吧？", "pinyin": "Kěnéng gēn shēngbìng yǒu guānxì ba?", "indonesian": "Mungkin ada hubungannya dengan sakit?"},
+          {"hanzi": "可能是。你吃药了吗？", "pinyin": "Kěnéng shì. Nǐ chī yào le ma?", "indonesian": "Mungkin. Kamu sudah minum obat?"},
+          {"hanzi": "我吃了，但是没有好转。", "pinyin": "Wǒ chīle, dànshì méiyǒu hǎozhuǎn.", "indonesian": "Saya sudah minum, tapi tidak ada perbaikan."},
+          {"hanzi": "你应该去看医生。", "pinyin": "Nǐ yīnggāi qù kàn yīshēng.", "indonesian": "Kamu harus pergi ke dokter."},
+          {"hanzi": "好的，明天我去看医生。", "pinyin": "Hǎo de, míngtiān wǒ qù kàn yīshēng.", "indonesian": "Baik, besok saya akan pergi ke dokter."},
+          {"hanzi": "祝你早日康复！", "pinyin": "Zhù nǐ zǎorì kāngfù!", "indonesian": "Semoga kamu cepat sembuh!"}
+        ]
+      }
+    ]
+  },
+  "HSK4": {
+    "words": [
+      {
+        "hanzi": "教授",
+        "pinyin": "jiàoshòu",
+        "indonesian": "profesor",
+        "examples": [
+          {"hanzi": "他是一位大学教授。", "pinyin": "Tā shì yī wèi dàxué jiàoshòu.", "indonesian": "Dia adalah seorang profesor universitas."},
+          {"hanzi": "教授的课很有意思。", "pinyin": "Jiàoshòu de kè hěn yǒuyìsi.", "indonesian": "Kuliah profesor itu sangat menarik."}
+        ]
+      },
+      {
+        "hanzi": "管理",
+        "pinyin": "guǎnlǐ",
+        "indonesian": "mengelola/manajemen",
+        "examples": [
+          {"hanzi": "他很擅长管理时间。", "pinyin": "Tā hěn shàncháng guǎnlǐ shíjiān.", "indonesian": "Dia sangat pandai mengelola waktu."},
+          {"hanzi": "这是一家管理很好的公司。", "pinyin": "Zhè shì yī jiā guǎnlǐ hěn hǎo de gōngsī.", "indonesian": "Ini adalah perusahaan dengan manajemen yang sangat baik."}
+        ]
+      },
+      {
+        "hanzi": "成功",
+        "pinyin": "chénggōng",
+        "indonesian": "berhasil/sukses",
+        "examples": [
+          {"hanzi": "他终于成功了。", "pinyin": "Tā zhōngyú chénggōng le.", "indonesian": "Dia akhirnya berhasil."},
+          {"hanzi": "希望你学习成功。", "pinyin": "Xīwàng nǐ xuéxí chénggōng.", "indonesian": "Semoga kamu sukses dalam belajar."}
+        ]
+      },
+      {
+        "hanzi": "工资",
+        "pinyin": "gōngzī",
+        "indonesian": "gaji",
+        "examples": [
+          {"hanzi": "他的工资很高。", "pinyin": "Tā de gōngzī hěn gāo.", "indonesian": "Gajinya sangat tinggi."},
+          {"hanzi": "这份工作的工资是多少？", "pinyin": "Zhè fèn gōngzuò de gōngzī shì duōshǎo?", "indonesian": "Berapa gaji untuk pekerjaan ini?"}
+        ]
+      },
+      {
+        "hanzi": "幽默",
+        "pinyin": "yōumò",
+        "indonesian": "humoris",
+        "examples": [
+          {"hanzi": "他是一个很幽默的人。", "pinyin": "Tā shì yīgè hěn yōumò de rén.", "indonesian": "Dia adalah orang yang sangat humoris."},
+          {"hanzi": "这个笑话很幽默。", "pinyin": "Zhège xiàohuà hěn yōumò.", "indonesian": "Lelucon ini sangat lucu."}
+        ]
+      },
+      {
+        "hanzi": "浪漫",
+        "pinyin": "làngmàn",
+        "indonesian": "romantis",
+        "examples": [
+          {"hanzi": "这部电影很浪漫。", "pinyin": "Zhè bù diànyǐng hěn làngmàn.", "indonesian": "Film ini sangat romantis."},
+          {"hanzi": "他送了我一束花，很浪漫。", "pinyin": "Tā sòngle wǒ yī shù huā, hěn làngmàn.", "indonesian": "Dia memberiku seikat bunga, sangat romantis."}
+        ]
+      },
+      {
+        "hanzi": "警察",
+        "pinyin": "jǐngchá",
+        "indonesian": "polisi",
+        "examples": [
+          {"hanzi": "请问警察局在哪里？", "pinyin": "Qǐngwèn jǐngchájú zài nǎlǐ?", "indonesian": "Permisi, kantor polisi ada di mana?"},
+          {"hanzi": "我的朋友是一名警察。", "pinyin": "Wǒ de péngyou shì yī míng jǐngchá.", "indonesian": "Teman saya adalah seorang polisi."}
+        ]
+      },
+      {
+        "hanzi": "热闹",
+        "pinyin": "rènào",
+        "indonesian": "ramai",
+        "examples": [
+          {"hanzi": "这个城市非常热闹。", "pinyin": "Zhège chéngshì fēicháng rènào.", "indonesian": "Kota ini sangat ramai."},
+          {"hanzi": "今天商场里很热闹。", "pinyin": "Jīntiān shāngchǎng lǐ hěn rènào.", "indonesian": "Hari ini di dalam mal sangat ramai."}
+        ]
+      },
+      {
+        "hanzi": "严格",
+        "pinyin": "yángé",
+        "indonesian": "ketat/disiplin",
+        "examples": [
+          {"hanzi": "我们的老师很严格。", "pinyin": "Wǒmen de lǎoshī hěn yángé.", "indonesian": "Guru kami sangat disiplin."},
+          {"hanzi": "他对自己要求很严格。", "pinyin": "Tā duì zìjǐ yāoqiú hěn yángé.", "indonesian": "Dia sangat menuntut dirinya sendiri."}
+        ]
+      },
+      {
+        "hanzi": "适应",
+        "pinyin": "shìyìng",
+        "indonesian": "beradaptasi",
+        "examples": [
+          {"hanzi": "我正在适应这里的生活。", "pinyin": "Wǒ zhèngzài shìyìng zhèlǐ de shēnghuó.", "indonesian": "Saya sedang beradaptasi dengan kehidupan di sini."},
+          {"hanzi": "你需要时间来适应新环境。", "pinyin": "Nǐ xūyào shíjiān lái shìyìng xīn huánjìng.", "indonesian": "Kamu butuh waktu untuk beradaptasi dengan lingkungan baru."}
+        ]
+      }
+    ],
+    "dialog_ending": [
+      {
+        "topic": "Membicarakan pekerjaan",
+        "conversation": [
+          {"hanzi": "你觉得这份工作怎么样？", "pinyin": "Nǐ juéde zhè fèn gōngzuò zěnmeyàng?", "indonesian": "Bagaimana menurutmu pekerjaan ini?"},
+          {"hanzi": "工作内容很有挑战性，但工资不高。", "pinyin": "Gōngzuò nèiróng hěn tiǎozhànxìng, dàn gōngzī bù gāo.", "indonesian": "Isi pekerjaannya sangat menantang, tapi gajinya tidak tinggi."},
+          {"hanzi": "是啊，不过可以学到很多东西。", "pinyin": "Shì a, búguò kěyǐ xuédào hěn duō dōngxi.", "indonesian": "Iya, tapi bisa belajar banyak hal."},
+          {"hanzi": "你有什么长远的职业规划吗？", "pinyin": "Nǐ yǒu shénme chángyuǎn de zhíyè guīhuà ma?", "indonesian": "Apakah kamu punya rencana karir jangka panjang?"},
+          {"hanzi": "我希望未来能做管理工作。", "pinyin": "Wǒ xīwàng wèilái néng zuò guǎnlǐ gōngzuò.", "indonesian": "Saya berharap di masa depan bisa bekerja di bidang manajemen."},
+          {"hanzi": "这个想法很好！", "pinyin": "Zhège xiǎngfǎ hěn hǎo!", "indonesian": "Ide yang sangat bagus!"},
+          {"hanzi": "但是需要很严格的要求自己。", "pinyin": "Dànshì xūyào hěn yángé de yāoqiú zìjǐ.", "indonesian": "Tapi butuh tuntutan yang sangat ketat pada diri sendiri."},
+          {"hanzi": "我相信你一定能成功。", "pinyin": "Wǒ xiāngxìn nǐ yīdìng néng chénggōng.", "indonesian": "Saya yakin kamu pasti bisa berhasil."},
+          {"hanzi": "谢谢你！", "pinyin": "Xièxie nǐ!", "indonesian": "Terima kasih!"},
+          {"hanzi": "不客气，加油！", "pinyin": "Bú kèqi, jiāyóu!", "indonesian": "Sama-sama, semangat!"}
+        ]
+      },
+      {
+        "topic": "Kehidupan di kota",
+        "conversation": [
+          {"hanzi": "这座城市生活怎么样？", "pinyin": "Zhè zuò chéngshì shēnghuó zěnmeyàng?", "indonesian": "Bagaimana kehidupan di kota ini?"},
+          {"hanzi": "交通很方便，但是夏天很热。", "pinyin": "Jiāotōng hěn fāngbiàn, dànshì xiàtiān hěn rè.", "indonesian": "Transportasi sangat mudah, tapi musim panasnya sangat panas."},
+          {"hanzi": "而且晚上很热闹。", "pinyin": "Érqiě wǎnshang hěn rènào.", "indonesian": "Dan malamnya sangat ramai."},
+          {"hanzi": "你适应这里的生活了吗？", "pinyin": "Nǐ shìyìng zhèlǐ de shēnghuó le ma?", "indonesian": "Apakah kamu sudah beradaptasi dengan kehidupan di sini?"},
+          {"hanzi": "适应了，我很喜欢这里的环境。", "pinyin": "Shìyìng le, wǒ hěn xǐhuān zhèlǐ de huánjìng.", "indonesian": "Sudah, saya sangat suka lingkungannya di sini."},
+          {"hanzi": "除了夏天，其他季节都很好。", "pinyin": "Chúle xiàtiān, qítā jìjié dōu hěn hǎo.", "indonesian": "Selain musim panas, musim lainnya semua baik."},
+          {"hanzi": "是啊，而且有很多公园。", "pinyin": "Shì a, érqiě yǒu hěn duō gōngyuán.", "indonesian": "Iya, dan banyak taman."},
+          {"hanzi": "你周末喜欢去哪儿？", "pinyin": "Nǐ zhōumò xǐhuān qù nǎr?", "indonesian": "Kamu suka pergi ke mana di akhir pekan?"},
+          {"hanzi": "我喜欢去爬山。", "pinyin": "Wǒ xǐhuān qù páshān.", "indonesian": "Saya suka pergi mendaki gunung."},
+          {"hanzi": "爬山是个好运动。", "pinyin": "Páshān shìgè hǎo yùndòng.", "indonesian": "Mendaki gunung adalah olahraga yang bagus."}
+        ]
+      },
+      {
+        "topic": "Sifat karakter",
+        "conversation": [
+          {"hanzi": "你觉得他怎么样？", "pinyin": "Nǐ juéde tā zěnmeyàng?", "indonesian": "Menurutmu dia bagaimana?"},
+          {"hanzi": "他很幽默，而且工作很认真。", "pinyin": "Tā hěn yōumò, érqiě gōngzuò hěn rènzhēn.", "indonesian": "Dia sangat humoris, dan bekerja sangat serius."},
+          {"hanzi": "是啊，跟他聊天总是很开心。", "pinyin": "Shì a, gēn tā liáotiān zǒngshì hěn kāixīn.", "indonesian": "Iya, mengobrol dengannya selalu menyenangkan."},
+          {"hanzi": "他还是一个很浪漫的人。", "pinyin": "Tā háishì yīgè hěn làngmàn de rén.", "indonesian": "Dia juga orang yang sangat romantis."},
+          {"hanzi": "真的吗？我怎么不知道。", "pinyin": "Zhēn de ma? Wǒ zěnme bù zhīdào.", "indonesian": "Benarkah? Kok saya tidak tahu."},
+          {"hanzi": "他送了他妻子一束花，特别浪漫。", "pinyin": "Tā sòngle tā qīzi yī shù huā, tèbié làngmàn.", "indonesian": "Dia mengirim seikat bunga untuk istrinya, sangat romantis."},
+          {"hanzi": "他的太太很幸福。", "pinyin": "Tā de tàitài hěn xìngfú.", "indonesian": "Istrinya sangat bahagia."},
+          {"hanzi": "是的，我觉得他们非常适合。", "pinyin": "Shì de, wǒ juéde tāmen fēicháng shìhé.", "indonesian": "Ya, saya rasa mereka sangat cocok."},
+          {"hanzi": "他们是怎么认识的？", "pinyin": "Tāmen shì zěnme rènshi de?", "indonesian": "Bagaimana mereka bisa kenalan?"},
+          {"hanzi": "他们是大学同学。", "pinyin": "Tāmen shì dàxué tóngxué.", "indonesian": "Mereka teman kuliah."}
+        ]
+      }
+    ]
+  }
+}
