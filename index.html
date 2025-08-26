@@ -341,7 +341,7 @@
         // 1. Intro Slides
         slides.push({
           type: "title",
-          title: "Selamat Datang!",
+          title: "Selamat Datang Di Kelas Trial!",
           hanzi: "欢迎来到HSK学习!",
           pinyin: "Huānyíng lái dào HSK xuéxí!",
         });
@@ -407,14 +407,22 @@
         slide.className =
           "slide p-8 md:p-12 flex flex-col justify-center items-center text-center bg-white/60 backdrop-blur-xl rounded-3xl border border-white/30 shadow-2xl";
 
+        const logoImg = document.createElement('img');
+        logoImg.src = 'logo.png';
+        logoImg.alt = 'Logo';
+        logoImg.className = 'absolute top-6 right-6 w-20 h-auto opacity-75'; // Tailwind classes for styling
+        slide.appendChild(logoImg);
+        
+        let slideContent = '';
+
         if (slideData.type === "title") {
-          slide.innerHTML = `
+          slideContent = `
                 <h1 class="anim-el text-5xl md:text-7xl font-bold text-indigo-600 mb-4">${slideData.title}</h1>
                 <h2 class="anim-el text-4xl md:text-6xl font-bold text-slate-800 hanzi">${slideData.hanzi}</h2>
                 <h3 class="anim-el text-2xl md:text-3xl text-slate-500 mt-2">(${slideData.pinyin})</h3>
             `;
         } else if (slideData.type === "agenda") {
-          slide.innerHTML = `
+          slideContent = `
                 <h3 class="anim-el text-4xl md:text-5xl font-bold mb-8 text-slate-800">Agenda Hari Ini</h3>
                 <ol class="anim-el text-xl md:text-3xl text-left space-y-4 text-slate-700">
                     <li class="flex items-center"><span class="text-blue-500 mr-3 font-bold">1.</span> Kosakata HSK 2-4 (<span class="hanzi">生词</span>)</li>
@@ -423,7 +431,7 @@
                 </ol>
             `;
         } else if (slideData.type === "section") {
-          slide.innerHTML = `
+          slideContent = `
                 <img src="https://placehold.co/100x100/6366f1/FFFFFF?text=${encodeURIComponent(
                   slideData.icon
                 )}" alt="${
@@ -455,7 +463,7 @@
             )
             .join("");
 
-          slide.innerHTML = `
+          slideContent = `
                 <div class="anim-el w-full flex flex-col items-center justify-center text-center">
                     <div class="flex items-center justify-center gap-x-4">
                         <h1 class="hanzi text-7xl md:text-8xl font-bold text-slate-800">${word.hanzi}</h1>
@@ -509,25 +517,28 @@
 
           slide.classList.remove("text-center", "items-center");
           slide.classList.add("items-start");
-          slide.innerHTML = `
+          slideContent = `
                 <h2 class="anim-el text-3xl md:text-5xl font-bold mb-6 self-center text-purple-600 hanzi">${slideData.topic}</h2>
                 <div class="w-full flex-grow overflow-y-auto custom-scrollbar pr-4">
                     <ul class="space-y-4">${conversationItems}</ul>
                 </div>
             `;
         } else if (slideData.type === "closing") {
-          slide.innerHTML = `
+          slideContent = `
                 <h1 class="anim-el text-5xl md:text-6xl font-bold text-indigo-600 mb-4">${slideData.title}</h1>
                 <h2 class="anim-el text-4xl md:text-5xl font-bold text-slate-800 hanzi">${slideData.hanzi}</h2>
                 <h3 class="anim-el text-2xl text-slate-600 mt-8">Pelajaran hari ini selesai. (<span class="hanzi">今天的课就到这里。</span>)</h3>
             `;
         } else if (slideData.type === "qa") {
-          slide.innerHTML = `
+          slideContent = `
                 <h2 class="anim-el text-3xl md:text-5xl font-bold text-slate-800 mb-4">${slideData.title}</h2>
                 <p class="anim-el hanzi md:text-6xl text-4xl">${slideData.hanzi}</p>
                 <p class="anim-el mt-8 text-lg text-slate-600">Terima kasih atas partisipasinya!</p>
             `;
         }
+
+        slide.innerHTML = slideContent + `<img src="logo.png" alt="Logo" class="absolute top-8 right-8 w-16 h-auto opacity-75">`;
+
         return slide;
       }
 
